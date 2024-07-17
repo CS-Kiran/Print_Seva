@@ -1,10 +1,13 @@
-function App() {
+import HomePage from "./pages/HomePage";
 
+function App() {
   return (
     <>
-      <h1 className="text-4xl font-bold">Home Page</h1>
+      <div className="bg-gray-50 font-mono">
+        <HomePage />
+      </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
