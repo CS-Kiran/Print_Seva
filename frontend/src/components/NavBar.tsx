@@ -16,7 +16,7 @@ const NavBar = () => {
 
   return (
     <div className="w-full bg-white flex justify-center items-center" id="home">
-      <nav className="fixed top-1 w-[55rem] rounded-md mt-2 z-20 bg-gray-50 shadow-lg border-2">
+      <nav className="fixed top-1 w-[55rem] rounded-md mt-2 z-20 bg-gray-50 shadow-lg border-2 ">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <div className="flex items-center space-x-2">
             <img src="/print_seva.png" className="h-12 mr-4" alt="Print_Seva Logo" />
