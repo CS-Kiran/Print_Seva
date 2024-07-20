@@ -9,7 +9,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative bg-white py-16 h-screen flex items-center overflow-hidden ">
+    <section className="relative bg-white py-16 h-screen flex items-center overflow-hidden">
       <div className="absolute inset-0 flex justify-center items-center z-10">
         <div className="shadow-2xl relative w-[48rem] h-[32rem] bg-[#ffffff1a] border-[1px] border-[#ffffff20] backdrop-blur-[16px] backdrop-saturate-[120%] rounded-lg"></div>
       </div>

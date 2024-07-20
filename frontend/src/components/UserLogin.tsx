@@ -18,7 +18,7 @@ const UserLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 relative">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 relative animate-fadeIn">
       {/* Back SVG */}
       <div
         className="absolute top-5 left-5 cursor-pointer"
@@ -45,7 +45,7 @@ const UserLogin = () => {
       </div>
 
       <div className="relative bg-white p-3 rounded-lg shadow-2xl max-w-md w-full transform transition-transform">
-        <img src={art} alt="Art" className="w-full h-[12rem] rounded-lg transition duration-500 ease-in-out shadow-lg hover:shadow-2xl hover:scale-110" />
+        <img src={art} alt="Art" className="w-full h-[15rem] rounded-lg transition duration-500 ease-in-out shadow-lg hover:shadow-2xl hover:scale-110" />
         <h2 className="text-2xl text-center font-semibold text-gray-800 mb-5 mt-5 hover:animate-wiggle">
           {isSignUp
             ? "Sign Up"

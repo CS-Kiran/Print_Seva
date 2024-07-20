@@ -1,8 +1,8 @@
 const Contact = () => {
   return (
     <section id="contact" className="bg-white py-16">
-      <div className="max-w-screen-xl mx-auto px-4 text-center">
-        <h2 className="text-3xl font-bold text-gray-900">Contact Us</h2>
+      <div className="max-w-screen-lg mx-auto text-center shadow-lg bg-[#ffffff1a] border-[1px] border-[#ffffff20] backdrop-blur-[100px] backdrop-saturate-[120%] p-6">
+        <h2 className="text-5xl mt-4 font-bold text-gray-900">Contact Us</h2>
         <p className="mt-4 text-gray-600">
           We'd love to hear from you! Get in touch with us for any queries or support.
         </p>

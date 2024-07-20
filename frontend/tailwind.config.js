@@ -7,6 +7,11 @@ export default {
         movePendulum: "movePendulum 7s infinite",
         wiggle: 'wiggle 1.5s ease-in-out infinite',
         horizontalBounce: "horizontalBounce 1s infinite",
+        fadeIn: 'fadeIn 1s ease-out',
+        fadeOut: 'fadeOut 1s ease-out',
+        scaleUp: 'scaleUp 1s ease-out',
+        rotate: 'rotate 4s linear infinite',
+        colorChange: 'colorChange 1s ease-out',
       },
       keyframes: {
         movePendulum: {
@@ -29,6 +34,27 @@ export default {
         horizontalBounce: {
           "0%, 100%": { transform: "translateX(0)" },
           "50%": { transform: "translateX(-10px)" },
+        },
+
+        fadeIn: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+        fadeOut: {
+          '0%': { opacity: 1 },
+          '100%': { opacity: 0 },
+        },
+        scaleUp: {
+          '0%': { transform: 'scale(0.5)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        rotate: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg)' },
+        },
+        colorChange: {
+          '0%': { color: '#000' },
+          '100%': { color: '#ff6347' }, 
         },
       },
     },
