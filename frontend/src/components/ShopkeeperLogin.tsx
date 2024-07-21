@@ -1,11 +1,23 @@
-import { useState } from 'react';
+import { ChangeEventHandler, useState } from 'react';
 import art from '../assets/art2.jpg';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const ShopkeeperLogin = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [shopImage, setShopImage] = useState<string | ArrayBuffer | null>(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    shopName: "",
+    shopAddress: "",
+    contact: "",
+    costSingleSide: "",
+    costBothSide: "",
+  });
+  const [shopImage, setShopImage] = useState<File | null>(null);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const toggleForm = () => {
@@ -18,24 +30,102 @@ const ShopkeeperLogin = () => {
     setIsSignUp(false);
   };
 
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
+  };
+
   const handleShopImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setShopImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setShopImage(file);
     } else {
       setShopImage(null);
     }
   };
 
-  const renderInputField = (id, type, placeholder, required = true) => (
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      if (isSignUp) {
+        const shopkeeperFormData = new FormData();
+        shopkeeperFormData.append("name", formData.name);
+        shopkeeperFormData.append("email", formData.email);
+        shopkeeperFormData.append("password", formData.password);
+        shopkeeperFormData.append("shopName", formData.shopName);
+        shopkeeperFormData.append("shopAddress", formData.shopAddress);
+        shopkeeperFormData.append("contact", formData.contact);
+        shopkeeperFormData.append("costSingleSide", formData.costSingleSide);
+        shopkeeperFormData.append("costBothSide", formData.costBothSide);
+        if (shopImage) {
+          shopkeeperFormData.append("shop_image", shopImage);
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const response = await axios.post("http://localhost:5000/register/shopkeeper", shopkeeperFormData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        alert("Registration successful");
+        setFormData({
+          name: "",
+          email: "",
+          password: "",
+          shopName: "",
+          shopAddress: "",
+          contact: "",
+          costSingleSide: "",
+          costBothSide: "",
+        });
+        setShopImage(null);
+        navigate('/get-started/shopkeeper');
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const response = await axios.post("http://localhost:5000/login/shopkeeper", {
+          email: formData.email,
+          password: formData.password,
+        });
+        alert("Login successful");
+        setFormData({
+          name: "",
+          email: "",
+          password: "",
+          shopName: "",
+          shopAddress: "",
+          contact: "",
+          costSingleSide: "",
+          costBothSide: "",
+        });
+        navigate('/');
+      }
+    } catch (error) {
+      setError(error.response?.data?.error || "An error occurred");
+      alert(error.response?.data?.error || "An error occurred");
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        shopName: "",
+        shopAddress: "",
+        contact: "",
+        costSingleSide: "",
+        costBothSide: "",
+      });
+      setShopImage(null);
+    }
+  };
+
+  const renderInputField = (id: string | undefined, type: string | undefined, placeholder: string | undefined, required = true) => (
     <div className="mb-5">
       <input
         type={type}
         id={id}
+        value={formData[id]}
+        onChange={handleChange}
         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-2.5"
         placeholder={placeholder}
         required={required}
@@ -43,7 +133,7 @@ const ShopkeeperLogin = () => {
     </div>
   );
 
-  const renderFileInputField = (id, accept, onChange, required = true) => (
+  const renderFileInputField = (id: string | undefined, accept: string | undefined, onChange: ChangeEventHandler<HTMLInputElement> | undefined, required = true) => (
     <div className="mb-5">
       <input
         type="file"
@@ -53,11 +143,11 @@ const ShopkeeperLogin = () => {
         className="border-2 file-input w-full max-w-full file-input-ghost file-input-bordered"
         required={required}
       />
-      {shopImage && typeof shopImage === 'string' && (
+      {shopImage && shopImage instanceof File && (
         <div className="mt-5">
           <img
-            src={shopImage}
-            alt="Shop"
+            src={URL.createObjectURL(shopImage)}
+            alt="Profile"
             className="w-full h-40 object-cover rounded-lg"
           />
         </div>
@@ -66,21 +156,23 @@ const ShopkeeperLogin = () => {
   );
 
   const renderForm = () => (
-    <form className="p-2">
+    <form className="p-2" onSubmit={handleSubmit}>
       {isSignUp && (
         <>
           {renderInputField('name', 'text', 'Name')}
           {renderInputField('email', 'email', 'Email')}
           {renderInputField('password', 'password', 'Password')}
+          {renderInputField('confirmPassword', 'password', 'Confirm Password')}
           {renderInputField('shopName', 'text', 'Shop Name')}
           {renderInputField('shopAddress', 'text', 'Shop Address')}
+          {renderInputField('contact', 'text', 'Contact')}
           {renderFileInputField('shopImage', 'image/*', handleShopImageChange)}
           {renderInputField('costSingleSide', 'number', 'Cost Single Side')}
           {renderInputField('costBothSide', 'number', 'Cost Both Side')}
         </>
       )}
       {!isForgotPassword && !isSignUp && renderInputField('email', 'email', 'Email')}
-      {!isForgotPassword && renderInputField('password', 'password', 'Password')}
+      {!isForgotPassword && !isSignUp && renderInputField('password', 'password', 'Password')}
       {isForgotPassword && renderInputField('email', 'email', 'Email')}
       <button
         type="submit"
@@ -105,7 +197,7 @@ const ShopkeeperLogin = () => {
         <img
           src="https://www.svgrepo.com/show/521969/arrow-right-circle.svg"
           alt="User Login"
-          className="w-10 h-10 hover:shadow-lg hover:animate-horizontalBounce transition duration-300 ease-linear rounded-full ml-auto"
+          className="animate-horizontalBounce w-10 h-10 hover:shadow-lg hover:animate-horizontalBounce transition duration-300 ease-linear rounded-full ml-auto"
         />
         <p className="text-gray-600 text-sm mt-2 text-center">User Login</p>
       </div>
