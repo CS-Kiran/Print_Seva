@@ -1,0 +1,4 @@
+# Database directories and cache files
+uploads/
+__pycache__/
+*.db
