@@ -2,6 +2,7 @@ import { ChangeEventHandler, useState } from 'react';
 import art from '../assets/art2.jpg';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAlert } from '../context/AlertContext';
 
 const ShopkeeperLogin = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -10,6 +11,7 @@ const ShopkeeperLogin = () => {
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     shopName: "",
     shopAddress: "",
     contact: "",
@@ -19,6 +21,7 @@ const ShopkeeperLogin = () => {
   const [shopImage, setShopImage] = useState<File | null>(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
 
   const toggleForm = () => {
     setIsSignUp(!isSignUp);
@@ -46,9 +49,33 @@ const ShopkeeperLogin = () => {
     }
   };
 
+  const validateForm = () => {
+    const requiredFields = isSignUp
+      ? ['name', 'email', 'password', 'confirmPassword', 'shopName', 'shopAddress', 'contact', 'costSingleSide', 'costBothSide']
+      : ['email', 'password'];
+
+    for (const field of requiredFields) {
+      if (!formData[field]) {
+        showAlert("warning", `Please fill out the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()} field.`);
+        return false;
+      }
+    }
+
+    if (isSignUp && formData.password !== formData.confirmPassword) {
+      showAlert("warning", "Passwords do not match.");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!validateForm()) {
+      return;
+    }
 
     try {
       if (isSignUp) {
@@ -56,6 +83,7 @@ const ShopkeeperLogin = () => {
         shopkeeperFormData.append("name", formData.name);
         shopkeeperFormData.append("email", formData.email);
         shopkeeperFormData.append("password", formData.password);
+        shopkeeperFormData.append("confirmPassword", formData.confirmPassword);
         shopkeeperFormData.append("shopName", formData.shopName);
         shopkeeperFormData.append("shopAddress", formData.shopAddress);
         shopkeeperFormData.append("contact", formData.contact);
@@ -70,11 +98,12 @@ const ShopkeeperLogin = () => {
             "Content-Type": "multipart/form-data",
           },
         });
-        alert("Registration successful");
+        showAlert("success", "Registration successful");
         setFormData({
           name: "",
           email: "",
           password: "",
+          confirmPassword: "",
           shopName: "",
           shopAddress: "",
           contact: "",
@@ -89,11 +118,12 @@ const ShopkeeperLogin = () => {
           email: formData.email,
           password: formData.password,
         });
-        alert("Login successful");
+        showAlert("success", "Login successful");
         setFormData({
           name: "",
           email: "",
           password: "",
+          confirmPassword: "",
           shopName: "",
           shopAddress: "",
           contact: "",
@@ -103,12 +133,14 @@ const ShopkeeperLogin = () => {
         navigate('/');
       }
     } catch (error) {
-      setError(error.response?.data?.error || "An error occurred");
-      alert(error.response?.data?.error || "An error occurred");
+      const errorMessage = error.response?.data?.error || "An error occurred";
+      setError(errorMessage);
+      showAlert("error", errorMessage);
       setFormData({
         name: "",
         email: "",
         password: "",
+        confirmPassword: "",
         shopName: "",
         shopAddress: "",
         contact: "",

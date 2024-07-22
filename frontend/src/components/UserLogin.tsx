@@ -1,7 +1,8 @@
 import { ChangeEventHandler, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAlert } from "../context/AlertContext";
 import axios from "axios";
 import art from "../assets/art1.jpg";
-import { useNavigate } from "react-router-dom";
 
 const UserLogin = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -15,6 +16,7 @@ const UserLogin = () => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
 
   const toggleForm = () => {
     setIsSignUp(!isSignUp);
@@ -45,18 +47,32 @@ const UserLogin = () => {
     }
   };
 
+  const validateForm = () => {
+    if (!formData.email || !formData.password) {
+      showAlert("warning", "Email and Password are required.");
+      return false;
+    }
+    if (isSignUp && (!formData.username || !formData.confirmPassword)) {
+      showAlert("warning", "All fields are required for sign-up.");
+      return false;
+    }
+    if (isSignUp && formData.password !== formData.confirmPassword) {
+      showAlert("warning", "Passwords do not match.");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       if (isSignUp) {
-        if (formData.password !== formData.confirmPassword) {
-          setError("Passwords do not match");
-          alert("Passwords do not match");
-          return;
-        }
-
         const userFormData = new FormData();
         userFormData.append("name", formData.username);
         userFormData.append("email", formData.email);
@@ -73,7 +89,7 @@ const UserLogin = () => {
           },
         });
 
-        alert("Registration successful");
+        showAlert("success", "Registration successful");
         setFormData({
           username: "",
           email: "",
@@ -88,7 +104,7 @@ const UserLogin = () => {
           email: formData.email,
           password: formData.password,
         });
-        alert("Login successful");
+        showAlert("success", "Login successful");
         setFormData({
           username: "",
           email: "",
@@ -98,8 +114,9 @@ const UserLogin = () => {
         navigate('/')
       }
     } catch (error) {
-      setError(error.response?.data?.error || "An error occurred");
-      alert(error.response?.data?.error || "An error occurred");
+      const errorMessage = error.response?.data?.error || "An error occurred";
+      setError(errorMessage);
+      showAlert("error", errorMessage);
       setFormData({
         username: "",
         email: "",
@@ -109,7 +126,6 @@ const UserLogin = () => {
       setProfileImage(null);
     }
   };
-
 
   const renderInputField = (type: string | undefined, id: string | undefined, placeholder: string | undefined, required = true) => (
     <div className="mb-5">

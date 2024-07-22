@@ -6,7 +6,7 @@ def create_tables():
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS user (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL,
@@ -17,7 +17,7 @@ def create_tables():
     ''')
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS shopkeeper (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            shopkeeper_id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL,
@@ -27,6 +27,16 @@ def create_tables():
             shop_image TEXT,
             cost_single_side FLOAT,
             cost_both_sides FLOAT
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_roles (
+            email TEXT NOT NULL UNIQUE,
+            role TEXT NOT NULL,
+            user_id INTEGER,
+            shopkeeper_id INTEGER,
+            FOREIGN KEY (user_id) REFERENCES users(user_id),
+            FOREIGN KEY (shopkeeper_id) REFERENCES shopkeepers(shopkeeper_id)
         )
     ''')
     cursor.execute('''

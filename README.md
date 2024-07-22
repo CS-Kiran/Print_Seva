@@ -42,7 +42,7 @@ To run the project locally, follow these steps:
    - **Backend (Flask):**
         ```bash
         cd ../backend
-        python3 app.py
+        python3 app.py # starts python-flask server at default port:5000
         ```
 5. **Open the application:** Open your browser and navigate to http://localhost:3000 to see the Print_Seva application running.
 
