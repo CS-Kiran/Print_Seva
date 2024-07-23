@@ -83,7 +83,7 @@ def register_user():
 
         # Insert user details into the database
         cursor.execute('''
-            INSERT INTO users (name, email, password, profile_image)
+            INSERT INTO user (name, email, password, profile_image)
             VALUES (?, ?, ?, ?)
         ''', (name, email, hashed_password, profile_image_path))
         
@@ -145,7 +145,7 @@ def register_shopkeeper():
 
         # Insert shopkeeper details into the database
         cursor.execute('''
-            INSERT INTO shopkeepers (name, email, password, shop_name, address, contact, shop_image, cost_single_side, cost_both_sides)
+            INSERT INTO shopkeeper (name, email, password, shop_name, address, contact, shop_image, cost_single_side, cost_both_sides)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (name, email, hashed_password, shop_name, address, contact, shop_image_path, cost_single_side, cost_both_sides))
         
@@ -174,9 +174,9 @@ def login_user():
     password = data['password']
     
     # Query the database to check if the user exists and the password is correct
-    user = query_db('SELECT * FROM users WHERE email = ?', [email], one=True)
+    user = query_db('SELECT * FROM user WHERE email = ?', [email], one=True)
     if user and bcrypt.check_password_hash(user['password'], password):
-        access_token = create_access_token(identity={'id': user['id'], 'email': user['email']})
+        access_token = create_access_token(identity={'id': user['user_id'], 'email': user['email']})
         return jsonify({"token": access_token, "message": "Login successful"}), 200
     return jsonify({"error": "Invalid credentials"}), 401
 
@@ -189,9 +189,9 @@ def login_shopkeeper():
     password = data['password']
     
     # Query the database to check if the shopkeeper exists and the password is correct
-    shopkeeper = query_db('SELECT * FROM shopkeepers WHERE email = ?', [email], one=True)
+    shopkeeper = query_db('SELECT * FROM shopkeeper WHERE email = ?', [email], one=True)
     if shopkeeper and bcrypt.check_password_hash(shopkeeper['password'], password):
-        access_token = create_access_token(identity={'id': shopkeeper['id'], 'email': shopkeeper['email']})
+        access_token = create_access_token(identity={'id': shopkeeper['shopkeeper_id'], 'email': shopkeeper['email']})
         return jsonify({"token": access_token, "message": "Login successful"}), 200
     return jsonify({"error": "Invalid credentials"}), 401
 

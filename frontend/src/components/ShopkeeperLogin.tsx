@@ -130,7 +130,7 @@ const ShopkeeperLogin = () => {
           costSingleSide: "",
           costBothSide: "",
         });
-        navigate('/');
+        navigate('/shopkeeper-dashboard');
       }
     } catch (error) {
       const errorMessage = error.response?.data?.error || "An error occurred";

@@ -1,10 +1,10 @@
-import upload from "../icons/upload.png";
-import store from "../icons/store.png";
-import payment from "../icons/payment.png";
-import tracking from "../icons/tracking.png";
-import quality from "../icons/quality.png";
-import cost from "../icons/cost.png";
-import support from "../icons/support.png";
+import upload from "../icons/image/upload.png";
+import store from "../icons/image/store.png";
+import payment from "../icons/image/payment.png";
+import tracking from "../icons/image/tracking.png";
+import quality from "../icons/image/quality.png";
+import cost from "../icons/image/cost.png";
+import support from "../icons/image/support.png";
 
 const features = [
   {

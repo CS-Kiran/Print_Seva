@@ -111,7 +111,7 @@ const UserLogin = () => {
           password: "",
           confirmPassword: "",
         });
-        navigate('/')
+        navigate('/user-dashboard')
       }
     } catch (error) {
       const errorMessage = error.response?.data?.error || "An error occurred";
