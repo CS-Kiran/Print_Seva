@@ -165,36 +165,38 @@ def register_shopkeeper():
 
     return jsonify({"message": "Shopkeeper registered successfully"}), 201
 
-
-# User Login API
+# login user API
 @app.route('/login/user', methods=['POST'])
 def login_user():
     data = request.get_json()
     email = data['email']
     password = data['password']
     
-    # Query the database to check if the user exists and the password is correct
     user = query_db('SELECT * FROM user WHERE email = ?', [email], one=True)
     if user and bcrypt.check_password_hash(user['password'], password):
-        access_token = create_access_token(identity={'id': user['user_id'], 'email': user['email']})
+        access_token = create_access_token(identity={'email': user['email']})
         return jsonify({"token": access_token, "message": "Login successful"}), 200
     return jsonify({"error": "Invalid credentials"}), 401
 
-
-# Shopkeeper Login API
+# login_shopkeeper API
 @app.route('/login/shopkeeper', methods=['POST'])
 def login_shopkeeper():
     data = request.get_json()
     email = data['email']
     password = data['password']
     
-    # Query the database to check if the shopkeeper exists and the password is correct
     shopkeeper = query_db('SELECT * FROM shopkeeper WHERE email = ?', [email], one=True)
     if shopkeeper and bcrypt.check_password_hash(shopkeeper['password'], password):
-        access_token = create_access_token(identity={'id': shopkeeper['shopkeeper_id'], 'email': shopkeeper['email']})
+        access_token = create_access_token(identity={'email': shopkeeper['email']})
         return jsonify({"token": access_token, "message": "Login successful"}), 200
     return jsonify({"error": "Invalid credentials"}), 401
 
+# Logout API to clear session
+@app.route('/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    # Invalidate the token
+    return jsonify({"message": "Logout successful"}), 200
 
 # Dashboard API
 @app.route('/dashboard', methods=['GET'])
@@ -208,6 +210,7 @@ def dashboard():
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 # Run the Flask app on default port 5000 
 if __name__ == '__main__':

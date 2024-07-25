@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import slide_video from "../assets/slidebar.mp4";
 import shopIcon from "../icons/svg/available_shop.svg";
 import sendRequestIcon from "../icons/svg/send_request.svg";
@@ -7,7 +8,6 @@ import profileIcon from "../icons/svg/profile.svg";
 import pendingRequestIcon from "../icons/svg/pending_request.svg";
 import acceptedRequestIcon from "../icons/svg/track_request.svg";
 import logoutIcon from "../icons/svg/logout.svg";
-import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ role }: { role: string }) => {
   const [activeTab, setActiveTab] = useState(role === "user" ? "Available Shops" : "Profile");
@@ -83,14 +83,6 @@ const Sidebar = ({ role }: { role: string }) => {
                 {role === "shopkeeper" && (
                   <>
                     <a
-                      className={`flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 transform rounded-lg hover:bg-gray-400 hover:text-gray-900 ${activeTab === 'Profile' ? 'bg-gray-400 text-gray-900' : 'bg-transparent'}`}
-                      href="#"
-                      onClick={() => handleTabClick('Profile')}
-                    >
-                      <img src={profileIcon} alt="Profile" className="w-6 h-6" />
-                      <span className="mx-4 font-medium">Profile</span>
-                    </a>
-                    <a
                       className={`flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 transform rounded-lg hover:bg-gray-400 hover:text-gray-900 ${activeTab === 'Pending Request' ? 'bg-gray-400 text-gray-900' : 'bg-transparent'}`}
                       href="#"
                       onClick={() => handleTabClick('Pending Request')}
@@ -105,6 +97,14 @@ const Sidebar = ({ role }: { role: string }) => {
                     >
                       <img src={acceptedRequestIcon} alt="Track Request" className="w-7 h-7" />
                       <span className="mx-4 font-medium">Track Request</span>
+                    </a>
+                    <a
+                      className={`flex items-center px-4 py-2 mt-5 text-gray-600 transition-colors duration-300 transform rounded-lg hover:bg-gray-400 hover:text-gray-900 ${activeTab === 'Profile' ? 'bg-gray-400 text-gray-900' : 'bg-transparent'}`}
+                      href="#"
+                      onClick={() => handleTabClick('Profile')}
+                    >
+                      <img src={profileIcon} alt="Profile" className="w-6 h-6" />
+                      <span className="mx-4 font-medium">Profile</span>
                     </a>
                   </>
                 )}

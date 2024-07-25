@@ -118,6 +118,7 @@ const ShopkeeperLogin = () => {
           email: formData.email,
           password: formData.password,
         });
+        console.log(response.data);
         showAlert("success", "Login successful");
         setFormData({
           name: "",
