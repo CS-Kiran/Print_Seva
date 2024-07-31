@@ -1,8 +1,8 @@
-import { ChangeEventHandler, useState } from 'react';
-import art from '../assets/art2.jpg';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { useAlert } from '../context/AlertContext';
+import { ChangeEventHandler, useState } from "react";
+import art from "../assets/art2.jpg";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useAlert } from "../context/AlertContext";
 
 const ShopkeeperLogin = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -51,12 +51,27 @@ const ShopkeeperLogin = () => {
 
   const validateForm = () => {
     const requiredFields = isSignUp
-      ? ['name', 'email', 'password', 'confirmPassword', 'shopName', 'shopAddress', 'contact', 'costSingleSide', 'costBothSide']
-      : ['email', 'password'];
+      ? [
+          "name",
+          "email",
+          "password",
+          "confirmPassword",
+          "shopName",
+          "shopAddress",
+          "contact",
+          "costSingleSide",
+          "costBothSide",
+        ]
+      : ["email", "password"];
 
     for (const field of requiredFields) {
       if (!formData[field]) {
-        showAlert("warning", `Please fill out the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()} field.`);
+        showAlert(
+          "warning",
+          `Please fill out the ${field
+            .replace(/([A-Z])/g, " $1")
+            .toLowerCase()} field.`
+        );
         return false;
       }
     }
@@ -93,11 +108,15 @@ const ShopkeeperLogin = () => {
           shopkeeperFormData.append("shop_image", shopImage);
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const response = await axios.post("http://localhost:5000/register/shopkeeper", shopkeeperFormData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const response = await axios.post(
+          "http://localhost:5000/register/shopkeeper",
+          shopkeeperFormData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
         showAlert("success", "Registration successful");
         setFormData({
           name: "",
@@ -111,14 +130,18 @@ const ShopkeeperLogin = () => {
           costBothSide: "",
         });
         setShopImage(null);
-        navigate('/get-started/shopkeeper');
+        navigate("/get-started/shopkeeper");
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const response = await axios.post("http://localhost:5000/login/shopkeeper", {
-          email: formData.email,
-          password: formData.password,
-        });
-        console.log(response.data);
+        const response = await axios.post(
+          "http://localhost:5000/login/shopkeeper",
+          {
+            email: formData.email,
+            password: formData.password,
+          }
+        );
+        const { token } = response.data;
+        localStorage.setItem("shopkeeper_token", token);
         showAlert("success", "Login successful");
         setFormData({
           name: "",
@@ -131,7 +154,7 @@ const ShopkeeperLogin = () => {
           costSingleSide: "",
           costBothSide: "",
         });
-        navigate('/shopkeeper-dashboard');
+        navigate("/shopkeeper-dashboard");
       }
     } catch (error) {
       const errorMessage = error.response?.data?.error || "An error occurred";
@@ -152,7 +175,12 @@ const ShopkeeperLogin = () => {
     }
   };
 
-  const renderInputField = (id: string | undefined, type: string | undefined, placeholder: string | undefined, required = true) => (
+  const renderInputField = (
+    id: string | undefined,
+    type: string | undefined,
+    placeholder: string | undefined,
+    required = true
+  ) => (
     <div className="mb-5">
       <input
         type={type}
@@ -166,7 +194,12 @@ const ShopkeeperLogin = () => {
     </div>
   );
 
-  const renderFileInputField = (id: string | undefined, accept: string | undefined, onChange: ChangeEventHandler<HTMLInputElement> | undefined, required = true) => (
+  const renderFileInputField = (
+    id: string | undefined,
+    accept: string | undefined,
+    onChange: ChangeEventHandler<HTMLInputElement> | undefined,
+    required = true
+  ) => (
     <div className="mb-5">
       <input
         type="file"
@@ -192,33 +225,40 @@ const ShopkeeperLogin = () => {
     <form className="p-2" onSubmit={handleSubmit}>
       {isSignUp && (
         <>
-          {renderInputField('name', 'text', 'Name')}
-          {renderInputField('email', 'email', 'Email')}
-          {renderInputField('password', 'password', 'Password')}
-          {renderInputField('confirmPassword', 'password', 'Confirm Password')}
-          {renderInputField('shopName', 'text', 'Shop Name')}
-          {renderInputField('shopAddress', 'text', 'Shop Address')}
-          {renderInputField('contact', 'text', 'Contact')}
-          {renderFileInputField('shopImage', 'image/*', handleShopImageChange)}
-          {renderInputField('costSingleSide', 'number', 'Cost Single Side')}
-          {renderInputField('costBothSide', 'number', 'Cost Both Side')}
+          {renderInputField("name", "text", "Name")}
+          {renderInputField("email", "email", "Email")}
+          {renderInputField("password", "password", "Password")}
+          {renderInputField("confirmPassword", "password", "Confirm Password")}
+          {renderInputField("shopName", "text", "Shop Name")}
+          {renderInputField("shopAddress", "text", "Shop Address")}
+          {renderInputField("contact", "text", "Contact")}
+          {renderFileInputField("shopImage", "image/*", handleShopImageChange)}
+          {renderInputField("costSingleSide", "number", "Cost Single Side")}
+          {renderInputField("costBothSide", "number", "Cost Both Side")}
         </>
       )}
-      {!isForgotPassword && !isSignUp && renderInputField('email', 'email', 'Email')}
-      {!isForgotPassword && !isSignUp && renderInputField('password', 'password', 'Password')}
-      {isForgotPassword && renderInputField('email', 'email', 'Email')}
+      {!isForgotPassword &&
+        !isSignUp &&
+        renderInputField("email", "email", "Email")}
+      {!isForgotPassword &&
+        !isSignUp &&
+        renderInputField("password", "password", "Password")}
+      {isForgotPassword && renderInputField("email", "email", "Email")}
       <button
         type="submit"
         className="text-white bg-violet-600 hover:bg-violet-700 focus:ring-4 focus:outline-none focus:ring-violet-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center"
       >
-        {isSignUp ? 'Sign Up' : isForgotPassword ? 'Reset Password' : 'Sign In'}
+        {isSignUp ? "Sign Up" : isForgotPassword ? "Reset Password" : "Sign In"}
       </button>
     </form>
   );
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 relative animate-fadeIn">
-      <div className="absolute top-5 left-5 cursor-pointer" onClick={() => navigate("/")}>
+      <div
+        className="absolute top-5 left-5 cursor-pointer"
+        onClick={() => navigate("/")}
+      >
         <img
           src="https://www.svgrepo.com/show/521963/arrow-left-circle.svg"
           alt="Back"
@@ -226,7 +266,10 @@ const ShopkeeperLogin = () => {
         />
         <p className="text-gray-600 text-sm mt-2 text-center">Back to Home</p>
       </div>
-      <div className="absolute top-5 right-6 cursor-pointer" onClick={() => navigate("/get-started/user")}>
+      <div
+        className="absolute top-5 right-6 cursor-pointer"
+        onClick={() => navigate("/get-started/user")}
+      >
         <img
           src="https://www.svgrepo.com/show/521969/arrow-right-circle.svg"
           alt="User Login"
@@ -236,9 +279,17 @@ const ShopkeeperLogin = () => {
       </div>
 
       <div className="relative bg-white p-3 my-4 rounded-lg shadow-2xl max-w-md w-full transform transition-transform">
-        <img src={art} alt="Art" className="w-full h-[15rem] rounded-lg transition duration-500 ease-in-out shadow-lg hover:shadow-2xl hover:scale-110" />
+        <img
+          src={art}
+          alt="Art"
+          className="w-full h-[15rem] rounded-lg transition duration-500 ease-in-out shadow-lg hover:shadow-2xl hover:scale-110"
+        />
         <h2 className="text-2xl text-center font-semibold text-gray-800 mb-5 mt-5 hover:animate-wiggle">
-          {isSignUp ? 'Shopkeeper Sign Up' : isForgotPassword ? 'Forgot Password' : 'Shopkeeper Sign In'}
+          {isSignUp
+            ? "Shopkeeper Sign Up"
+            : isForgotPassword
+            ? "Forgot Password"
+            : "Shopkeeper Sign In"}
         </h2>
         {renderForm()}
         {!isForgotPassword && (
@@ -246,19 +297,34 @@ const ShopkeeperLogin = () => {
             {isSignUp ? (
               <>
                 <span>Already have an account?</span>
-                <b onClick={toggleForm} className="cursor-pointer text-violet-500 ml-1">Sign in here</b>
+                <b
+                  onClick={toggleForm}
+                  className="cursor-pointer text-violet-500 ml-1"
+                >
+                  Sign in here
+                </b>
               </>
             ) : (
               <>
                 <span>Don't have an account?</span>
-                <b onClick={toggleForm} className="cursor-pointer text-violet-500 ml-1">Sign up here</b>
+                <b
+                  onClick={toggleForm}
+                  className="cursor-pointer text-violet-500 ml-1"
+                >
+                  Sign up here
+                </b>
               </>
             )}
           </p>
         )}
         {!isSignUp && (
           <p className="mt-2 text-sm text-gray-600">
-            <b onClick={toggleForgotPassword} className="cursor-pointer text-violet-500">Forgot password?</b>
+            <b
+              onClick={toggleForgotPassword}
+              className="cursor-pointer text-violet-500"
+            >
+              Forgot password?
+            </b>
           </p>
         )}
       </div>

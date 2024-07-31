@@ -1,9 +1,12 @@
+import { ShopkeeperProvider } from "../context/ShopkeeperContext";
 import Sidebar from "../components/SideBar";
 
 const ShopkeeperDashboard = () => {
   return (
     <>
-      <Sidebar role="shopkeeper" />
+      <ShopkeeperProvider>
+        <Sidebar role="shopkeeper" />
+      </ShopkeeperProvider>
     </>
   );
 };

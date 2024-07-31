@@ -2,7 +2,7 @@
 
 Print_Seva is a web application that simplifies your printing needs. Upload documents, choose a print shop, and save time with hassle-free printing.
 
-![Alt text](./frontend/src/assets/print_seva.png)
+![Alt text](./frontend/public/print_seva_home.png)
 
 ## Technologies Used
 

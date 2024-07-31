@@ -3,9 +3,9 @@ import HomePage from "./pages/HomePage";
 import GetStartedPage from "./pages/GetStartedPage";
 import { useState } from "react";
 import Intro from "./components/Intro";
-import { AlertProvider } from "./context/AlertContext";
 import UserDashboard from "./pages/UserDashboard";
 import ShopkeeperDashboard from "./pages/ShopkeeperDashboard";
+import { AlertProvider } from "./context/AlertContext";
 
 function App() {
   const [showIntro, setShowIntro] = useState(true);

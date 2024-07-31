@@ -83,11 +83,15 @@ const UserLogin = () => {
         }
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const response = await axios.post("http://localhost:5000/register/user", userFormData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        const response = await axios.post(
+          "http://localhost:5000/register/user",
+          userFormData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
 
         showAlert("success", "Registration successful");
         setFormData({
@@ -97,14 +101,15 @@ const UserLogin = () => {
           confirmPassword: "",
         });
         setProfileImage(null);
-        navigate('/get-started/user');
+        navigate("/get-started/user");
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const response = await axios.post("http://localhost:5000/login/user", {
           email: formData.email,
           password: formData.password,
         });
-        console.log(response.data);
+        const { token } = response.data;
+        localStorage.setItem("user_token", token);
         showAlert("success", "Login successful");
         setFormData({
           username: "",
@@ -112,7 +117,7 @@ const UserLogin = () => {
           password: "",
           confirmPassword: "",
         });
-        navigate('/user-dashboard')
+        navigate("/user-dashboard");
       }
     } catch (error) {
       const errorMessage = error.response?.data?.error || "An error occurred";
@@ -128,7 +133,12 @@ const UserLogin = () => {
     }
   };
 
-  const renderInputField = (type: string | undefined, id: string | undefined, placeholder: string | undefined, required = true) => (
+  const renderInputField = (
+    type: string | undefined,
+    id: string | undefined,
+    placeholder: string | undefined,
+    required = true
+  ) => (
     <div className="mb-5">
       <input
         type={type}
@@ -142,7 +152,12 @@ const UserLogin = () => {
     </div>
   );
 
-  const renderFileInputField = (id: string | undefined, accept: string | undefined, onChange: ChangeEventHandler<HTMLInputElement> | undefined, required = true) => (
+  const renderFileInputField = (
+    id: string | undefined,
+    accept: string | undefined,
+    onChange: ChangeEventHandler<HTMLInputElement> | undefined,
+    required = true
+  ) => (
     <div className="mb-5">
       <input
         type="file"

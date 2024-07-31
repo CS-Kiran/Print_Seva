@@ -1,8 +1,9 @@
-from flask import Flask, request, jsonify, send_from_directory
+import datetime
+from flask import Flask, request, jsonify, send_from_directory, url_for
 from flask_bcrypt import Bcrypt
 
 # JWT Manager for handling JWT tokens for user authentication
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt, jwt_required, get_jwt_identity
 from flask_cors import CORS
 import sqlite3
 import os
@@ -27,6 +28,9 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 
 # Create tables if they don't exist in the database, structure is defined in models.py file
 create_tables()
+
+# In-memory storage for blacklisted tokens
+blacklist = set()
 
 # Function to check if the file uploaded is of allowed type or not
 def allowed_file(filename):
@@ -165,17 +169,29 @@ def register_shopkeeper():
 
     return jsonify({"message": "Shopkeeper registered successfully"}), 201
 
-# login user API
 @app.route('/login/user', methods=['POST'])
 def login_user():
     data = request.get_json()
-    email = data['email']
-    password = data['password']
+    email = data.get('email')
+    password = data.get('password')
     
+    if not email or not password:
+        return jsonify({"error": "Email and password are required"}), 400
+
     user = query_db('SELECT * FROM user WHERE email = ?', [email], one=True)
+    
     if user and bcrypt.check_password_hash(user['password'], password):
-        access_token = create_access_token(identity={'email': user['email']})
-        return jsonify({"token": access_token, "message": "Login successful"}), 200
+        token = create_access_token(identity={'email': user['email']})
+
+        user_data = {
+            'user_id': user['user_id'],
+            'email': user['email'],
+            'name': user['name'],
+            'profile_image': user['profile_image']
+        }
+
+        return jsonify({'message': 'Login successful', 'token': token, 'user': user_data}), 200
+    
     return jsonify({"error": "Invalid credentials"}), 401
 
 # login_shopkeeper API
@@ -187,15 +203,65 @@ def login_shopkeeper():
     
     shopkeeper = query_db('SELECT * FROM shopkeeper WHERE email = ?', [email], one=True)
     if shopkeeper and bcrypt.check_password_hash(shopkeeper['password'], password):
-        access_token = create_access_token(identity={'email': shopkeeper['email']})
-        return jsonify({"token": access_token, "message": "Login successful"}), 200
+        token = create_access_token(identity={'email': shopkeeper['email']})
+        
+        shopkeeper_data = {
+            'shopkeeper_id': shopkeeper['shopkeeper_id'],
+            'email': shopkeeper['email'],
+            'name': shopkeeper['name'],
+            'shop_image': shopkeeper['shop_image']
+        }     
+
+        return jsonify({'message': 'Login successful', 'token': token, 'user': shopkeeper_data}), 200
     return jsonify({"error": "Invalid credentials"}), 401
 
-# Logout API to clear session
-@app.route('/logout', methods=['POST'])
+
+@app.route('/api/user', methods=['GET'])
+@jwt_required()
+def get_user():
+    current_user = get_jwt_identity()
+    if current_user:
+        user = query_db('SELECT * FROM user WHERE email = ?', [current_user['email']], one=True)
+        if user:
+            user_data = {
+                'user_id': user['user_id'],
+                'email': user['email'],
+                'name': user['name'],
+                'profile_image':  url_for('uploaded_file', filename=os.path.basename(user['profile_image']), _external=True) if user['profile_image'] else None
+            }
+            return jsonify(user_data), 200
+    return jsonify({"error": "User not found"}), 404
+
+
+#Get Loged in shopkeeper data
+@app.route('/api/shopkeeper', methods=['GET'])
+@jwt_required()
+def get_shopkeeper():
+    current_user = get_jwt_identity()
+    shopkeeper = query_db('SELECT * FROM shopkeeper WHERE email = ?', [current_user['email']], one=True)
+    if shopkeeper:
+        shopkeeper_data = {
+           'shopkeeper_id': shopkeeper['shopkeeper_id'],
+            'name': shopkeeper['name'],
+            'email': shopkeeper['email'],
+            'shop_image':  url_for('uploaded_file', filename=os.path.basename(shopkeeper['shop_image']), _external=True) if shopkeeper['shop_image'] else None
+        }
+        return jsonify(shopkeeper_data), 200
+    return jsonify({"error": "Shopkeeper not found"}), 404
+
+
+# Check if a token has been blacklisted
+@jwt.token_in_blocklist_loader
+def check_if_token_in_blacklist(jwt_header, jwt_payload):
+    jti = jwt_payload['jti']
+    return jti in blacklist
+
+# Logout route to blacklist the token
+@app.route('/api/logout', methods=['POST'])
 @jwt_required()
 def logout():
-    # Invalidate the token
+    jti = get_jwt()['jti']
+    blacklist.add(jti)
     return jsonify({"message": "Logout successful"}), 200
 
 # Dashboard API
