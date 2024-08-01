@@ -250,6 +250,27 @@ def get_shopkeeper():
     return jsonify({"error": "Shopkeeper not found"}), 404
 
 
+# api to view all shops available
+@app.route('/api/shops', methods=['GET'])
+def get_shops():
+    shops = query_db('SELECT * FROM shopkeeper')
+    shop_list = []
+    
+    for shop in shops:
+        shop_dict = {
+            'shopkeeper_id': shop['shopkeeper_id'],
+            'shop_name': shop['shop_name'],
+            'address': shop['address'],
+            'shop_image': url_for('uploaded_file', filename=os.path.basename(shop['shop_image']), _external=True) if shop['shop_image'] else None,
+            'name': shop['name'],
+            'cost_single_side': shop['cost_single_side'],
+            'cost_both_sides': shop['cost_both_sides']
+        }
+        shop_list.append(shop_dict)
+
+    return jsonify(shop_list), 200
+
+
 # Check if a token has been blacklisted
 @jwt.token_in_blocklist_loader
 def check_if_token_in_blacklist(jwt_header, jwt_payload):

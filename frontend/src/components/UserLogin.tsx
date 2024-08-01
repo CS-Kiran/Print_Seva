@@ -31,20 +31,16 @@ const UserLogin = () => {
   const handleBackClick = () => navigate("/");
   const handleShopkeeperLoginClick = () => navigate("/get-started/shopkeeper");
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.id]: e.target.value,
     });
   };
 
-  const handleProfileImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setProfileImage(file);
-    } else {
-      setProfileImage(null);
-    }
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setProfileImage(file || null);
   };
 
   const validateForm = () => {
@@ -52,24 +48,24 @@ const UserLogin = () => {
       showAlert("warning", "Email and Password are required.");
       return false;
     }
-    if (isSignUp && (!formData.username || !formData.confirmPassword)) {
-      showAlert("warning", "All fields are required for sign-up.");
-      return false;
-    }
-    if (isSignUp && formData.password !== formData.confirmPassword) {
-      showAlert("warning", "Passwords do not match.");
-      return false;
+    if (isSignUp) {
+      if (!formData.username || !formData.confirmPassword) {
+        showAlert("warning", "All fields are required for sign-up.");
+        return false;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        showAlert("warning", "Passwords do not match.");
+        return false;
+      }
     }
     return true;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       if (isSignUp) {
@@ -78,20 +74,11 @@ const UserLogin = () => {
         userFormData.append("email", formData.email);
         userFormData.append("password", formData.password);
         userFormData.append("confirm_password", formData.confirmPassword);
-        if (profileImage) {
-          userFormData.append("profile_image", profileImage);
-        }
+        if (profileImage) userFormData.append("profile_image", profileImage);
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const response = await axios.post(
-          "http://localhost:5000/register/user",
-          userFormData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        await axios.post("http://localhost:5000/register/user", userFormData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
 
         showAlert("success", "Registration successful");
         setFormData({
@@ -103,11 +90,11 @@ const UserLogin = () => {
         setProfileImage(null);
         navigate("/get-started/user");
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const response = await axios.post("http://localhost:5000/login/user", {
           email: formData.email,
           password: formData.password,
         });
+
         const { token } = response.data;
         localStorage.setItem("user_token", token);
         showAlert("success", "Login successful");
@@ -120,7 +107,7 @@ const UserLogin = () => {
         navigate("/user-dashboard");
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.error || "An error occurred";
+      const errorMessage = (error as any).response?.data?.error || "An error occurred";
       setError(errorMessage);
       showAlert("error", errorMessage);
       setFormData({
@@ -134,9 +121,9 @@ const UserLogin = () => {
   };
 
   const renderInputField = (
-    type: string | undefined,
-    id: string | undefined,
-    placeholder: string | undefined,
+    type: string,
+    id: keyof typeof formData,
+    placeholder: string,
     required = true
   ) => (
     <div className="mb-5">
@@ -153,9 +140,9 @@ const UserLogin = () => {
   );
 
   const renderFileInputField = (
-    id: string | undefined,
-    accept: string | undefined,
-    onChange: ChangeEventHandler<HTMLInputElement> | undefined,
+    id: string,
+    accept: string,
+    onChange: ChangeEventHandler<HTMLInputElement>,
     required = true
   ) => (
     <div className="mb-5">
@@ -189,16 +176,9 @@ const UserLogin = () => {
     <form className="p-2" onSubmit={handleSubmit}>
       {isSignUp && renderInputField("text", "username", "Username")}
       {renderInputField("email", "email", "Email")}
-      {!isForgotPassword &&
-        renderInputField("password", "password", "Password")}
-      {isSignUp &&
-        renderInputField("password", "confirmPassword", "Confirm Password")}
-      {isSignUp &&
-        renderFileInputField(
-          "profileImage",
-          "image/*",
-          handleProfileImageChange
-        )}
+      {!isForgotPassword && renderInputField("password", "password", "Password")}
+      {isSignUp && renderInputField("password", "confirmPassword", "Confirm Password")}
+      {isSignUp && renderFileInputField("profileImage", "image/*", handleProfileImageChange)}
       <button
         type="submit"
         className="text-white bg-violet-600 hover:bg-violet-700 focus:ring-4 focus:outline-none focus:ring-violet-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 text-center"
@@ -215,20 +195,14 @@ const UserLogin = () => {
           {isSignUp ? (
             <>
               <span>Already have an account?</span>
-              <b
-                onClick={toggleForm}
-                className="cursor-pointer text-violet-500 ml-1"
-              >
+              <b onClick={toggleForm} className="cursor-pointer text-violet-500 ml-1">
                 Sign in here
               </b>
             </>
           ) : (
             <>
               <span>Don't have an account?</span>
-              <b
-                onClick={toggleForm}
-                className="cursor-pointer text-violet-500 ml-1"
-              >
+              <b onClick={toggleForm} className="cursor-pointer text-violet-500 ml-1">
                 Sign up here
               </b>
             </>
@@ -237,10 +211,7 @@ const UserLogin = () => {
       )}
       {!isSignUp && (
         <p className="mt-2 text-sm text-gray-600">
-          <b
-            onClick={toggleForgotPassword}
-            className="cursor-pointer text-violet-500"
-          >
+          <b onClick={toggleForgotPassword} className="cursor-pointer text-violet-500">
             Forgot password?
           </b>
         </p>
@@ -250,10 +221,7 @@ const UserLogin = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 relative animate-fadeIn">
-      <div
-        className="absolute top-5 left-5 cursor-pointer"
-        onClick={handleBackClick}
-      >
+      <div className="absolute top-5 left-5 cursor-pointer" onClick={handleBackClick}>
         <img
           src="https://www.svgrepo.com/show/521963/arrow-left-circle.svg"
           alt="Back"
@@ -261,18 +229,13 @@ const UserLogin = () => {
         />
         <p className="text-gray-600 text-sm mt-2 text-center">Back to Home</p>
       </div>
-      <div
-        className="absolute top-5 right-6 cursor-pointer"
-        onClick={handleShopkeeperLoginClick}
-      >
+      <div className="absolute top-5 right-6 cursor-pointer" onClick={handleShopkeeperLoginClick}>
         <img
           src="https://www.svgrepo.com/show/521969/arrow-right-circle.svg"
           alt="Shopkeeper Login"
           className="animate-horizontalBounce w-10 h-10 hover:shadow-lg hover:animate-horizontalBounce transition duration-300 ease-linear rounded-full ml-auto"
         />
-        <p className="text-gray-600 text-sm mt-2 text-center">
-          Shopkeeper Login
-        </p>
+        <p className="text-gray-600 text-sm mt-2 text-center">Shopkeeper Login</p>
       </div>
       <div className="relative bg-white p-3 rounded-lg shadow-2xl max-w-md w-full transform transition-transform">
         <img

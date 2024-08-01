@@ -1,7 +1,7 @@
 // src/components/Sidebar.js
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useShopkeeper } from '../context/ShopkeeperContext';
 import backgroundImage from "../assets/art1.jpg"; // Your background image path
@@ -14,7 +14,7 @@ import acceptedRequestIcon from "../icons/svg/track_request.svg";
 import logoutIcon from "../icons/svg/logout.svg";
 
 const Sidebar = ({ role }) => {
-  const [activeTab, setActiveTab] = useState(role === "user" ? "Available Shops" : "Profile");
+  const [activeTab, setActiveTab] = useState();
   const navigate = useNavigate();
   const { user, logout: userLogout } = useUser() || {}; // Use default empty object
   const { shopkeeper, logout: shopkeeperLogout } = useShopkeeper() || {}; // Use default empty object
@@ -62,7 +62,7 @@ const Sidebar = ({ role }) => {
   };
 
   return (
-    <aside className="relative flex flex-col w-[18rem] h-screen px-2 py-8 overflow-y-auto border-r bg-cover" style={{ backgroundImage: `url(${backgroundImage})` }}>
+    <aside className="relative flex flex-col min-w-[18rem] h-screen px-2 py-8 overflow-y-auto border-r bg-cover" style={{ backgroundImage: `url(${backgroundImage})` }}>
       <div className="relative z-10 flex flex-col h-full">
         <h1 className="mx-auto text-shadow font-bold text-white animate-scaleUp text-4xl transition duration-500 ease-in-out hover:scale-105">Print_Seva</h1>
         <div className="flex-grow mt-10">
@@ -75,14 +75,14 @@ const Sidebar = ({ role }) => {
               <nav>
                 {role === "user" && (
                   <>
-                    <a
+                    <Link
+                      to="/user-dashboard/available-shops"
                       className={`flex items-center px-4 py-2 mt-5 text-gray-900 transition-colors duration-300 transform rounded-lg hover:bg-white/70 hover:text-gray-900 ${activeTab === 'Available Shops' ? 'bg-white text-gray-900' : 'bg-transparent'}`}
-                      href="#"
                       onClick={() => handleTabClick('Available Shops')}
                     >
                       <img src={shopIcon} alt="Available Shops" className="w-7 h-7 group-hover:filter group-hover:invert" />
                       <span className="mx-4 font-medium">Available Shops</span>
-                    </a>
+                    </Link>
                     <a
                       className={`flex items-center px-4 py-2 mt-5 text-gray-900 transition-colors duration-300 transform rounded-lg hover:bg-white/70 hover:text-gray-900 ${activeTab === 'Send Request' ? 'bg-white text-gray-900' : 'bg-transparent'}`}
                       href="#"
