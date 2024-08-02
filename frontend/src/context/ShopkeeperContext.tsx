@@ -1,5 +1,3 @@
-// src/contexts/ShopkeeperContext.js
-
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -27,7 +25,7 @@ export const ShopkeeperProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        const token = localStorage.getItem('user_token');
+        const token = localStorage.getItem('shopkeeper_token');
     
         try {
             // Make API call to log out

@@ -39,7 +39,7 @@ const AvailableShops = () => {
           className="min-w-xl max-h-[23rem] bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-2xl transform transition-transform duration-300 hover:scale-105 mx-auto"
         >
           <img
-            className="object-cover w-full h-52"
+            className="object-cover rounded-t-lg w-full h-52"
             src={shop.shop_image || defaultImageUrl}
             alt={shop.shop_name}
           />

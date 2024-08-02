@@ -53,7 +53,7 @@ const Sidebar = ({ role }) => {
           src={profileImage}
           alt="avatar"
         />
-        <h4 className="mx-2 mt-2 font-semibold text-gray-950 text-2xl">{profile.name || 'User Name'}</h4>
+        <h4 className="mx-2 mt-2 font-semibold text-gray-950 text-2xl">{profile.name || 'User'}</h4>
         <p className="mx-2 mt-1 text-md font-medium text-gray-800">
           {profile.email || 'user@example.com'}
         </p>
@@ -99,26 +99,26 @@ const Sidebar = ({ role }) => {
                       <img src={notificationsIcon} alt="Notifications" className="w-6 h-6 group-hover:filter group-hover:invert" />
                       <span className="mx-4 font-medium">Notifications</span>
                     </a>
-                    <a
+                    <Link
+                      to='/user-dashboard/profile'
                       className={`flex items-center px-4 py-2 mt-5 text-gray-900 transition-colors duration-300 transform rounded-lg hover:bg-white/70 hover:text-gray-900 ${activeTab === 'Profile' ? 'bg-white text-gray-900' : 'bg-transparent'}`}
-                      href="#"
                       onClick={() => handleTabClick('Profile')}
                     >
                       <img src={profileIcon} alt="Profile" className="w-5 h-5 group-hover:filter group-hover:invert" />
                       <span className="mx-4 font-medium">Profile</span>
-                    </a>
+                    </Link>
                   </>
                 )}
                 {role === "shopkeeper" && (
                   <>
-                    <a
+                    <Link
+                      to="/shopkeeper-dashboard/profile"
                       className={`flex items-center px-4 py-2 mt-5 text-gray-900 transition-colors duration-300 transform rounded-lg hover:bg-white/70 hover:text-gray-900 ${activeTab === 'Profile' ? 'bg-white text-gray-900' : 'bg-transparent'}`}
-                      href="#"
                       onClick={() => handleTabClick('Profile')}
                     >
                       <img src={profileIcon} alt="Profile" className="w-6 h-6 group-hover:filter group-hover:invert" />
                       <span className="mx-4 font-medium">Profile</span>
-                    </a>
+                    </Link>
                     <a
                       className={`flex items-center px-4 py-2 mt-5 text-gray-900 transition-colors duration-300 transform rounded-lg hover:bg-white/70 hover:text-gray-900 ${activeTab === 'Pending Request' ? 'bg-white text-gray-900' : 'bg-transparent'}`}
                       href="#"

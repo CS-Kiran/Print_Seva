@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
-import SideBar from "../components/SideBar";
 import { UserProvider, useUser } from "../context/UserContext";
+import SideBar from "../components/SideBar";
 import AvailableShops from "../components/AvailableShops";
+import Profile from "../components/Profile";
 
 const DashboardIntro = () => {
   const { user } = useUser() as { user: String };
@@ -43,7 +44,7 @@ const UserDashboard = () => {
             {isIntroVisible && <DashboardIntro />}
             <Routes>
               <Route path="/available-shops" element={<AvailableShops />} />
-              {/* Add additional routes here if needed */}
+              <Route path="/profile" element={<Profile role="user" />} />
             </Routes>
           </div>
         </div>

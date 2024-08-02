@@ -26,10 +26,13 @@ export const UserProvider = ({ children }) => {
 
     const logout = async () => {
         const token = localStorage.getItem('user_token');
+    
         try {
+            // Make API call to log out
             await axios.post('http://127.0.0.1:5000/api/logout', {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            // Clear user data and token from local storage
             setUser(null);
             localStorage.removeItem('user_token');
         } catch (error) {

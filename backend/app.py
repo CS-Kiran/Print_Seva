@@ -227,13 +227,14 @@ def get_user():
                 'user_id': user['user_id'],
                 'email': user['email'],
                 'name': user['name'],
-                'profile_image':  url_for('uploaded_file', filename=os.path.basename(user['profile_image']), _external=True) if user['profile_image'] else None
+                'profile_image': url_for('uploaded_file', filename=os.path.basename(user['profile_image']), _external=True) if user['profile_image'] else None,
+                'contact': user['contact'],
+                'address': user['address']
             }
             return jsonify(user_data), 200
     return jsonify({"error": "User not found"}), 404
 
 
-#Get Loged in shopkeeper data
 @app.route('/api/shopkeeper', methods=['GET'])
 @jwt_required()
 def get_shopkeeper():
@@ -241,13 +242,19 @@ def get_shopkeeper():
     shopkeeper = query_db('SELECT * FROM shopkeeper WHERE email = ?', [current_user['email']], one=True)
     if shopkeeper:
         shopkeeper_data = {
-           'shopkeeper_id': shopkeeper['shopkeeper_id'],
+            'shopkeeper_id': shopkeeper['shopkeeper_id'],
             'name': shopkeeper['name'],
             'email': shopkeeper['email'],
-            'shop_image':  url_for('uploaded_file', filename=os.path.basename(shopkeeper['shop_image']), _external=True) if shopkeeper['shop_image'] else None
+            'shop_name': shopkeeper['shop_name'],
+            'address': shopkeeper['address'],
+            'contact': shopkeeper['contact'],
+            'shop_image': url_for('uploaded_file', filename=os.path.basename(shopkeeper['shop_image']), _external=True) if shopkeeper['shop_image'] else None,
+            'cost_single_side': shopkeeper['cost_single_side'],
+            'cost_both_sides': shopkeeper['cost_both_sides']
         }
         return jsonify(shopkeeper_data), 200
     return jsonify({"error": "Shopkeeper not found"}), 404
+
 
 
 # api to view all shops available

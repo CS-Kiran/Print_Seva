@@ -6,27 +6,32 @@ import Intro from "./components/Intro";
 import UserDashboard from "./pages/UserDashboard";
 import ShopkeeperDashboard from "./pages/ShopkeeperDashboard";
 import { AlertProvider } from "./context/AlertContext";
+import { UserProvider } from "./context/UserContext";
+import { ShopkeeperProvider } from "./context/ShopkeeperContext";
 
 function App() {
   const [showIntro, setShowIntro] = useState(true);
 
-  const handleIntroComplete = () => {
-    setShowIntro(false);
-  };
+  const handleIntroComplete = () => setShowIntro(false);
 
   return (
     <AlertProvider>
-      {showIntro && <Intro onComplete={handleIntroComplete} />}
-      {!showIntro && (
-        <div className="bg-gray-50 font-mono">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/get-started/*" element={<GetStartedPage />} />
-            <Route path="/user-dashboard/*" element={<UserDashboard />} />
-            <Route path="/shopkeeper-dashboard/*" element={<ShopkeeperDashboard />} />
-          </Routes>
-        </div>
-      )}
+      <UserProvider>
+        <ShopkeeperProvider>
+          {showIntro ? (
+            <Intro onComplete={handleIntroComplete} />
+          ) : (
+            <div className="bg-gray-50 font-mono">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/get-started/*" element={<GetStartedPage />} />
+                <Route path="/user-dashboard/*" element={<UserDashboard />} />
+                <Route path="/shopkeeper-dashboard/*" element={<ShopkeeperDashboard />} />
+              </Routes>
+            </div>
+          )}
+        </ShopkeeperProvider>
+      </UserProvider>
     </AlertProvider>
   );
 }
