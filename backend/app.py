@@ -10,6 +10,8 @@ import os
 
 # Secure filename to prevent path traversal attacks
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash
+
 
 # Import create_tables function from models.py to create tables in the database
 from models import create_tables
@@ -277,7 +279,6 @@ def get_shops():
 
     return jsonify(shop_list), 200
 
-
 # Check if a token has been blacklisted
 @jwt.token_in_blocklist_loader
 def check_if_token_in_blacklist(jwt_header, jwt_payload):
@@ -299,6 +300,98 @@ def dashboard():
     # Get the current user from the JWT token and return it as a response
     current_user = get_jwt_identity()
     return jsonify({"message": "Welcome to the dashboard", "user": current_user}), 200
+
+
+@app.route('/api/user/update', methods=['POST'])
+@jwt_required()
+def update_user():
+    current_user = get_jwt_identity()
+    user_id = request.form.get('user_id')
+    name = request.form.get('name')
+    email = request.form.get('email')
+    contact = request.form.get('contact')
+    address = request.form.get('address')
+    old_password = request.form.get('old_password')
+    new_password = request.form.get('new_password')
+
+    user = query_db('SELECT * FROM user WHERE email = ?', [email], one=True)
+    if user:
+        if name:
+            query_db('UPDATE user SET name = ? WHERE email = ?', [name, email])
+        if contact:
+            query_db('UPDATE user SET contact = ? WHERE email = ?', [contact, email])
+        if address:
+            query_db('UPDATE user SET address = ? WHERE email = ?', [address, email])
+        if old_password and new_password:
+            if bcrypt.check_password_hash(user['password'], old_password):
+                hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+                query_db('UPDATE user SET password = ? WHERE email = ?', [hashed_password, email])
+            else:
+                return jsonify({"error": "Old password is incorrect"}), 400
+        if 'profile_image' in request.files:
+            profile_image = request.files['profile_image']
+            if profile_image and allowed_file(profile_image.filename):
+                filename = secure_filename(profile_image.filename)
+                profile_image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                profile_image.save(profile_image_path)
+                os.chmod(profile_image_path, 0o644)
+                query_db('UPDATE user SET profile_image = ? WHERE email = ?', [profile_image_path, email])
+            else:
+                return jsonify({'error': 'Invalid file type for profile image'}), 400
+
+        return jsonify({"message": "User updated successfully"}), 200
+
+    return jsonify({"error": "User not found"}), 404
+
+@app.route('/api/shopkeeper/update', methods=['POST'])
+@jwt_required()
+def update_shopkeeper():
+    current_user = get_jwt_identity()
+    shopkeeper_id = request.form.get('shopkeeper_id')
+    name = request.form.get('name')
+    email = request.form.get('email')
+    contact = request.form.get('contact')
+    address = request.form.get('address')
+    shop_name = request.form.get('shop_name')
+    cost_single_side = request.form.get('cost_single_side')
+    cost_both_sides = request.form.get('cost_both_sides')
+    old_password = request.form.get('old_password')
+    new_password = request.form.get('new_password')
+
+    shopkeeper = query_db('SELECT * FROM shopkeeper WHERE email = ?', [email], one=True)
+    if shopkeeper:
+        if name:
+            query_db('UPDATE shopkeeper SET name = ? WHERE email = ?', [name, email])
+        if contact:
+            query_db('UPDATE shopkeeper SET contact = ? WHERE email = ?', [contact, email])
+        if address:
+            query_db('UPDATE shopkeeper SET address = ? WHERE email = ?', [address, email])
+        if shop_name:
+            query_db('UPDATE shopkeeper SET shop_name = ? WHERE email = ?', [shop_name, email])
+        if cost_single_side:
+            query_db('UPDATE shopkeeper SET cost_single_side = ? WHERE email = ?', [cost_single_side, email])
+        if cost_both_sides:
+            query_db('UPDATE shopkeeper SET cost_both_sides = ? WHERE email = ?', [cost_both_sides, email])
+        if old_password and new_password:
+            if bcrypt.check_password_hash(shopkeeper['password'], old_password):
+                hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+                query_db('UPDATE shopkeeper SET password = ? WHERE email = ?', [hashed_password, email])
+            else:
+                return jsonify({"error": "Old password is incorrect"}), 400
+        if 'shop_image' in request.files:
+            shop_image = request.files['shop_image']
+            if shop_image and allowed_file(shop_image.filename):
+                filename = secure_filename(shop_image.filename)
+                shop_image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                shop_image.save(shop_image_path)
+                os.chmod(shop_image_path, 0o644)
+                query_db('UPDATE shopkeeper SET shop_image = ? WHERE email = ?', [shop_image_path, email])
+            else:
+                return jsonify({'error': 'Invalid file type for shop image'}), 400
+
+        return jsonify({"message": "Shopkeeper updated successfully"}), 200
+
+    return jsonify({"error": "Shopkeeper not found"}), 404
 
 # File Upload API
 @app.route('/uploads/<filename>')

@@ -6,6 +6,7 @@ import {
 } from "../context/ShopkeeperContext";
 import SideBar from "../components/SideBar";
 import Profile from "../components/Profile";
+import EditProfile from "../components/EditProfile";
 
 const DashboardIntro = () => {
   const { shopkeeper } = useShopkeeper();
@@ -47,6 +48,7 @@ const ShopkeeperDashboard = () => {
             {isIntroVisible && <DashboardIntro />}
             <Routes>
               <Route path="/profile" element={<Profile role="shopkeeper" />} />
+              <Route path="/edit-profile" element={<EditProfile role="shopkeeper" />} />
             </Routes>
           </div>
         </div>

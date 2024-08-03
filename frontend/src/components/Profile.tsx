@@ -15,7 +15,12 @@ const Profile: React.FC<ProfileProps> = ({ role }) => {
   const profile = role === 'user' ? user : shopkeeper;
 
   const handleEditProfile = () => {
-    navigate('/edit-profile');
+    if (user) {
+      navigate('/user-dashboard/edit-profile');
+    } 
+    if  (shopkeeper) {
+      navigate('/shopkeeper-dashboard/edit-profile');
+    }
   };
 
   if (!profile) {

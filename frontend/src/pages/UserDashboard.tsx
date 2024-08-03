@@ -4,6 +4,7 @@ import { UserProvider, useUser } from "../context/UserContext";
 import SideBar from "../components/SideBar";
 import AvailableShops from "../components/AvailableShops";
 import Profile from "../components/Profile";
+import EditProfile from "../components/EditProfile";
 
 const DashboardIntro = () => {
   const { user } = useUser() as { user: String };
@@ -45,6 +46,7 @@ const UserDashboard = () => {
             <Routes>
               <Route path="/available-shops" element={<AvailableShops />} />
               <Route path="/profile" element={<Profile role="user" />} />
+              <Route path="/edit-profile" element={<EditProfile role="user" />} />
             </Routes>
           </div>
         </div>
