@@ -302,20 +302,27 @@ def dashboard():
     return jsonify({"message": "Welcome to the dashboard", "user": current_user}), 200
 
 
+def row_to_dict(row):
+    return dict(row) if row else {}
+
+
 @app.route('/api/user/update', methods=['POST'])
 @jwt_required()
 def update_user():
     current_user = get_jwt_identity()
-    user_id = request.form.get('user_id')
+    email = request.form.get('email', current_user['email'])  # Default to current email if not provided
     name = request.form.get('name')
-    email = request.form.get('email')
     contact = request.form.get('contact')
     address = request.form.get('address')
     old_password = request.form.get('old_password')
     new_password = request.form.get('new_password')
 
     user = query_db('SELECT * FROM user WHERE email = ?', [email], one=True)
-    if user:
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # Update user details
+    try:
         if name:
             query_db('UPDATE user SET name = ? WHERE email = ?', [name, email])
         if contact:
@@ -339,17 +346,31 @@ def update_user():
             else:
                 return jsonify({'error': 'Invalid file type for profile image'}), 400
 
-        return jsonify({"message": "User updated successfully"}), 200
+        # Fetch updated user data
+        updated_user = query_db('SELECT * FROM user WHERE email = ?', [email], one=True)
+        if updated_user:
+            user_data = {
+                'user_id': updated_user['user_id'],
+                'email': updated_user['email'],
+                'name': updated_user['name'],
+                'profile_image': url_for('uploaded_file', filename=os.path.basename(updated_user['profile_image']), _external=True) if updated_user['profile_image'] else None,
+                'contact': updated_user['contact'],
+                'address': updated_user['address']
+            }
+            return jsonify({"message": "User updated successfully", "user": user_data}), 200
+    except Exception as e:
+        print(f"Error updating user: {e}")
+        return jsonify({"error": "An error occurred while updating user"}), 500
 
-    return jsonify({"error": "User not found"}), 404
+    return jsonify({"message": "User updated successfully"}), 200
+
 
 @app.route('/api/shopkeeper/update', methods=['POST'])
 @jwt_required()
 def update_shopkeeper():
     current_user = get_jwt_identity()
-    shopkeeper_id = request.form.get('shopkeeper_id')
+    email = request.form.get('email', current_user['email'])  # Default to current email if not provided
     name = request.form.get('name')
-    email = request.form.get('email')
     contact = request.form.get('contact')
     address = request.form.get('address')
     shop_name = request.form.get('shop_name')
@@ -359,7 +380,11 @@ def update_shopkeeper():
     new_password = request.form.get('new_password')
 
     shopkeeper = query_db('SELECT * FROM shopkeeper WHERE email = ?', [email], one=True)
-    if shopkeeper:
+    if not shopkeeper:
+        return jsonify({"error": "Shopkeeper not found"}), 404
+
+    # Update shopkeeper details
+    try:
         if name:
             query_db('UPDATE shopkeeper SET name = ? WHERE email = ?', [name, email])
         if contact:
@@ -389,9 +414,28 @@ def update_shopkeeper():
             else:
                 return jsonify({'error': 'Invalid file type for shop image'}), 400
 
-        return jsonify({"message": "Shopkeeper updated successfully"}), 200
+        # Fetch updated shopkeeper data
+        updated_shopkeeper = query_db('SELECT * FROM shopkeeper WHERE email = ?', [email], one=True)
+        if updated_shopkeeper:
+            shopkeeper_data = {
+                'shopkeeper_id': updated_shopkeeper['shopkeeper_id'],
+                'name': updated_shopkeeper['name'],
+                'email': updated_shopkeeper['email'],
+                'shop_name': updated_shopkeeper['shop_name'],
+                'address': updated_shopkeeper['address'],
+                'contact': updated_shopkeeper['contact'],
+                'shop_image': url_for('uploaded_file', filename=os.path.basename(updated_shopkeeper['shop_image']), _external=True) if updated_shopkeeper['shop_image'] else None,
+                'cost_single_side': updated_shopkeeper['cost_single_side'],
+                'cost_both_sides': updated_shopkeeper['cost_both_sides']
+            }
+            return jsonify({"message": "Shopkeeper updated successfully", "shopkeeper": shopkeeper_data}), 200
+    except Exception as e:
+        print(f"Error updating shopkeeper: {e}")
+        return jsonify({"error": "An error occurred while updating shopkeeper"}), 500
 
-    return jsonify({"error": "Shopkeeper not found"}), 404
+    return jsonify({"message": "Shopkeeper updated successfully"}), 200
+
+
 
 # File Upload API
 @app.route('/uploads/<filename>')

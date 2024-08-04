@@ -24,6 +24,11 @@ export const UserProvider = ({ children }) => {
         }
     };
 
+    const updateUser = (data) => {
+        console.log("Updating user data:", data); // Debug log
+        setUser(data);
+    };
+
     const logout = async () => {
         const token = localStorage.getItem('user_token');
     
@@ -41,7 +46,7 @@ export const UserProvider = ({ children }) => {
     };
 
     return (
-        <UserContext.Provider value={{ user, logout }}>
+        <UserContext.Provider value={{ user, setUser: updateUser, logout }}>
             {children}
         </UserContext.Provider>
     );
