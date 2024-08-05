@@ -20,6 +20,7 @@ app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'your_print_seva_secret_key'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
+app.config['FILE_ALLOWED_EXTENSIONS'] = {'pdf', 'docx', 'txt', 'png', 'jpg', 'jpeg'}
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 CORS(app)
@@ -34,9 +35,13 @@ create_tables()
 # In-memory storage for blacklisted tokens
 blacklist = set()
 
-# Function to check if the file uploaded is of allowed type or not
+# Function to check if the image uploaded is of allowed type or not
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+# Function to check if the file uploaded is of allowed type or not for user request
+def file_allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['FILE_ALLOWED_EXTENSIONS']
 
 # Function to query the database and return the results as a dictionary object or a list of dictionary objects.
 def query_db(query, args=(), one=False):
@@ -218,6 +223,7 @@ def login_shopkeeper():
     return jsonify({"error": "Invalid credentials"}), 401
 
 
+# Get user details API
 @app.route('/api/user', methods=['GET'])
 @jwt_required()
 def get_user():
@@ -236,7 +242,7 @@ def get_user():
             return jsonify(user_data), 200
     return jsonify({"error": "User not found"}), 404
 
-
+# Get shopkeeper details API
 @app.route('/api/shopkeeper', methods=['GET'])
 @jwt_required()
 def get_shopkeeper():
@@ -259,7 +265,7 @@ def get_shopkeeper():
 
 
 
-# api to view all shops available
+# API to get all shops available
 @app.route('/api/shops', methods=['GET'])
 def get_shops():
     shops = query_db('SELECT * FROM shopkeeper')
@@ -435,6 +441,133 @@ def update_shopkeeper():
 
     return jsonify({"message": "Shopkeeper updated successfully"}), 200
 
+#API to store user request data
+@app.route('/api/user_request', methods=['POST'])
+@jwt_required()
+def create_user_request():
+    current_user = get_jwt_identity()
+    
+    # Check if a file is included in the request
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    if file and file_allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+    else:
+        return jsonify({'error': 'File type not allowed'}), 400
+
+    user = query_db('SELECT user_id FROM user WHERE email = ?', [current_user['email']], one=True)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    user_id = user['user_id']
+    
+    shop_name = request.form.get('shop_name')
+    shop = query_db('SELECT shopkeeper_id FROM shopkeeper WHERE shop_name = ?', [shop_name], one=True)
+    if not shop:
+        return jsonify({'error': 'Shop not found'}), 404
+    
+    shop_id = shop['shopkeeper_id']
+
+    # Extracting and validating request.form from form
+    total_pages = request.form.get('total_pages')
+    print_type = request.form.get('print_type')
+    print_side = request.form.get('print_side')
+    page_size = request.form.get('page_size')
+    copies = request.form.get('no_of_copies')
+    comments = request.form.get('comments')
+
+    # Check if all required fields are provided
+    if not all([total_pages, print_type, print_side, page_size, copies, shop_id, file_path]):
+        return jsonify({'error': 'Please provide all required fields'}), 400
+
+    try:
+        conn = sqlite3.connect('print_seva.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO user_request (user_id, total_pages, print_type, print_side, page_size, no_of_copies, shop_id, file_path, sender_email, status, request_time, update_time, comments)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?, ?, ?)
+        ''', (user_id, total_pages, print_type, print_side, page_size, copies, shop_id, file_path, current_user['email'], datetime.datetime.now(), datetime.datetime.now(), comments))
+        conn.commit()
+        conn.close()
+    except sqlite3.IntegrityError as e:
+        return jsonify({"error": "Failed to create request", "details": str(e)}), 400
+
+    return jsonify({"message": "User request created successfully"}), 201
+
+
+# Get User Requests API
+@app.route('/api/user_request', methods=['GET'])
+@jwt_required()
+def get_user_requests():
+    current_user = get_jwt_identity()
+    user_id = query_db('SELECT user_id FROM user WHERE email = ?', [current_user['email']], one=True)['user_id']
+    
+    requests = query_db('SELECT * FROM user_request WHERE user_id = ?', [user_id])
+    request_list = []
+    
+    for req in requests:
+        request_list.append({
+            'id': req['id'],
+            'total_pages': req['total_pages'],
+            'print_type': req['print_type'],
+            'print_side': req['print_side'],
+            'page_size': req['page_size'],
+            'copies': req['copies'],
+            'shop_id': req['shop_id'],
+            'file_path': req['file_path'],
+            'email': req['email'],
+            'status': req['status'],
+            'request_time': req['request_time'],
+            'update_time': req['update_time'],
+            'comments': req['comments']
+        })
+    
+    return jsonify(request_list), 200
+
+# Update User Request API
+@app.route('/api/user_request/<int:request_id>', methods=['PUT'])
+@jwt_required()
+def update_user_request(request_id):
+    data = request.get_json()
+    status = data.get('status')
+    comments = data.get('comments')
+
+    try:
+        conn = sqlite3.connect('print_seva.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE user_request
+            SET status = ?, comments = ?, update_time = ?
+            WHERE id = ?
+        ''', (status, comments, datetime.datetime.now(), request_id))
+        conn.commit()
+        conn.close()
+    except sqlite3.IntegrityError as e:
+        return jsonify({"error": "Failed to update request", "details": str(e)}), 400
+
+    return jsonify({"message": "User request updated successfully"}), 200
+
+# Delete User Request API
+@app.route('/api/user_request/<int:request_id>', methods=['DELETE'])
+@jwt_required()
+def delete_user_request(request_id):
+    try:
+        conn = sqlite3.connect('print_seva.db')
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM user_request WHERE id = ?', [request_id])
+        conn.commit()
+        conn.close()
+    except sqlite3.IntegrityError as e:
+        return jsonify({"error": "Failed to delete request", "details": str(e)}), 400
+
+    return jsonify({"message": "User request deleted successfully"}), 200
 
 
 # File Upload API

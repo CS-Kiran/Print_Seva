@@ -7,13 +7,13 @@ import { useAlert } from '../context/AlertContext';
 
 const FormInput = ({ label, type = 'text', name, value, onChange, required = false, disabled = false }) => (
   <div>
-    <label className="block text-gray-700">{label}</label>
+    <label className="block text-gray-700 ml-1">{label}</label>
     <input
       type={type}
       name={name}
       value={value}
       onChange={onChange}
-      className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+      className="mt-1 block w-full border border-gray-300 rounded-full py-2 px-4"
       required={required}
       disabled={disabled}
     />
@@ -117,7 +117,7 @@ const EditProfile = ({ role }) => {
               type="file"
               name="profile_image"
               onChange={handleFileChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              className="mt-1 block w-full border border-gray-300 rounded-full p-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-green-700 hover:file:bg-green-200"
             />
           </div>
           <FormInput label="Address" name="address" value={formData.address} onChange={handleChange} />
@@ -130,7 +130,7 @@ const EditProfile = ({ role }) => {
           )}
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
+            className="w-full bg-green-600 text-white p-2 rounded-md hover:bg-green-700"
           >
             Update Profile
           </button>

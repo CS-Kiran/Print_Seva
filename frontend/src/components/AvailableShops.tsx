@@ -36,7 +36,7 @@ const AvailableShops = () => {
       {shopsData.map((shop) => (
         <div
           key={shop.shop_name}
-          className="min-w-xl max-h-[23rem] bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-2xl transform transition-transform duration-300 hover:scale-105 mx-auto"
+          className="animate-fadeIn min-w-xl max-h-[23rem] bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-2xl transform transition-transform duration-300 hover:scale-105 mx-auto"
         >
           <img
             className="object-cover rounded-t-lg w-full h-52"
