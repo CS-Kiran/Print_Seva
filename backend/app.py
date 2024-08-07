@@ -1,6 +1,7 @@
 import datetime
 from flask import Flask, request, jsonify, send_from_directory, url_for
 from flask_bcrypt import Bcrypt
+from flask import send_from_directory, abort
 
 # JWT Manager for handling JWT tokens for user authentication
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt, jwt_required, get_jwt_identity
@@ -502,72 +503,85 @@ def create_user_request():
     return jsonify({"message": "User request created successfully"}), 201
 
 
-# Get User Requests API
-@app.route('/api/user_request', methods=['GET'])
+# Get all requests for the current shopkeeper
+@app.route('/api/shopkeeper/requests', methods=['POST'])
 @jwt_required()
-def get_user_requests():
+def get_shopkeeper_requests():
     current_user = get_jwt_identity()
-    user_id = query_db('SELECT user_id FROM user WHERE email = ?', [current_user['email']], one=True)['user_id']
-    
-    requests = query_db('SELECT * FROM user_request WHERE user_id = ?', [user_id])
-    request_list = []
-    
-    for req in requests:
-        request_list.append({
-            'id': req['id'],
-            'total_pages': req['total_pages'],
-            'print_type': req['print_type'],
-            'print_side': req['print_side'],
-            'page_size': req['page_size'],
-            'copies': req['copies'],
-            'shop_id': req['shop_id'],
-            'file_path': req['file_path'],
-            'email': req['email'],
-            'status': req['status'],
-            'request_time': req['request_time'],
-            'update_time': req['update_time'],
-            'comments': req['comments']
-        })
-    
-    return jsonify(request_list), 200
-
-# Update User Request API
-@app.route('/api/user_request/<int:request_id>', methods=['PUT'])
-@jwt_required()
-def update_user_request(request_id):
     data = request.get_json()
-    status = data.get('status')
-    comments = data.get('comments')
+    shopkeeper_id = data.get('shopkeeper_id')
+    
+    if not shopkeeper_id:
+        return jsonify({'error': 'shopkeeper_id is required'}), 400
 
+    # Ensure the current user is authorized to access the shopkeeper's requests
+    shopkeeper = query_db('SELECT shopkeeper_id FROM shopkeeper WHERE email = ? AND shopkeeper_id = ?', 
+                          [current_user['email'], shopkeeper_id], one=True)
+
+    if not shopkeeper:
+        return jsonify({'error': 'Shopkeeper not found or unauthorized access'}), 403
+    
+    # Retrieve user requests for the shopkeeper with status 'Pending'
+    rows = query_db('''
+        SELECT id, total_pages, print_type, print_side, page_size, no_of_copies, file_path, comments, sender_email, request_time
+        FROM user_request
+        WHERE shop_id = ? AND status = 'Pending'
+    ''', [shopkeeper_id])
+
+    if rows is None:
+        return jsonify({'error': 'Error retrieving requests'}), 500
+    
+    # Convert rows to a list of dictionaries
+    requests = [dict(row) for row in rows]
+
+    if len(requests) == 0:
+        return jsonify({'message': 'No requests found for this shopkeeper'}), 200
+
+    return jsonify(requests), 200
+
+
+# Update the request status based on the shopkeeper's action
+@app.route('/api/shopkeeper/requests/<int:request_id>/<action>', methods=['POST'])
+@jwt_required()
+def update_request_status(request_id, action):
     try:
+        current_user = get_jwt_identity()
+
+        action = 'Accepted' if action == 'accept' else 'Declined'
+        status = 'Responded'
+
         conn = sqlite3.connect('print_seva.db')
         cursor = conn.cursor()
         cursor.execute('''
             UPDATE user_request
-            SET status = ?, comments = ?, update_time = ?
+            SET status = ?, action = ?
             WHERE id = ?
-        ''', (status, comments, datetime.datetime.now(), request_id))
+        ''', (status, action, request_id))
         conn.commit()
         conn.close()
-    except sqlite3.IntegrityError as e:
-        return jsonify({"error": "Failed to update request", "details": str(e)}), 400
+        
+        return jsonify({'message': 'Request updated successfully'}), 200
 
-    return jsonify({"message": "User request updated successfully"}), 200
+    except Exception as e:
+        print(f"Exception: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
-# Delete User Request API
-@app.route('/api/user_request/<int:request_id>', methods=['DELETE'])
+
+
+
+# Download file API
+@app.route('/api/shopkeeper/download/uploads/<path:filename>', methods=['GET'])
 @jwt_required()
-def delete_user_request(request_id):
-    try:
-        conn = sqlite3.connect('print_seva.db')
-        cursor = conn.cursor()
-        cursor.execute('DELETE FROM user_request WHERE id = ?', [request_id])
-        conn.commit()
-        conn.close()
-    except sqlite3.IntegrityError as e:
-        return jsonify({"error": "Failed to delete request", "details": str(e)}), 400
+def download_file(filename):
+    current_user = get_jwt_identity()
 
-    return jsonify({"message": "User request deleted successfully"}), 200
+    try:
+        directory = app.config['UPLOAD_FOLDER']
+        return send_from_directory(directory, filename, as_attachment=True)
+    except FileNotFoundError:
+        return jsonify({'error': 'File not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 # File Upload API

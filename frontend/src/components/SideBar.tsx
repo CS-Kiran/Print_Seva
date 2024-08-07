@@ -127,14 +127,14 @@ const Sidebar = ({ role }) => {
                       <img src={acceptedRequestIcon} alt="Track Request" className="w-7 h-7 group-hover:filter group-hover:invert" />
                       <span className="mx-4 font-medium">Track Request</span>
                     </a>
-                    <a
+                    <Link
+                      to="/shopkeeper-dashboard/notification"
                       className={`flex items-center px-4 py-2 mt-5 text-gray-900 transition-colors duration-300 transform rounded-lg hover:bg-white/70 hover:text-gray-900 ${activeTab === 'Notifications' ? 'bg-white text-gray-900' : 'bg-transparent'}`}
-                      href="#"
                       onClick={() => handleTabClick('Notifications')}
                     >
                       <img src={notificationsIcon} alt="Notifications" className="w-8 h-8 group-hover:filter group-hover:invert" />
                       <span className="mx-4 font-medium">Notifications</span>
-                    </a>
+                    </Link>
                     <Link
                       to="/shopkeeper-dashboard/profile"
                       className={`flex items-center px-4 py-2 mt-5 text-gray-900 transition-colors duration-300 transform rounded-lg hover:bg-white/70 hover:text-gray-900 ${activeTab === 'Profile' ? 'bg-white text-gray-900' : 'bg-transparent'}`}
