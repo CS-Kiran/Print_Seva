@@ -91,14 +91,14 @@ const Sidebar = ({ role }) => {
                       <img src={sendRequestIcon} alt="Send Request" className="w-7 h-7 group-hover:filter group-hover:invert" />
                       <span className="mx-4 font-medium">Send Request</span>
                     </Link>
-                    <a
+                    <Link
+                      to="/user-dashboard/notification"
                       className={`flex items-center px-4 py-2 mt-5 text-gray-900 transition-colors duration-300 transform rounded-lg hover:bg-white/70 hover:text-gray-900 ${activeTab === 'Notifications' ? 'bg-white text-gray-900' : 'bg-transparent'}`}
-                      href="#"
                       onClick={() => handleTabClick('Notifications')}
                     >
                       <img src={notificationsIcon} alt="Notifications" className="w-6 h-6 group-hover:filter group-hover:invert" />
                       <span className="mx-4 font-medium">Notifications</span>
-                    </a>
+                    </Link>
                     <Link
                       to='/user-dashboard/profile'
                       className={`flex items-center px-4 py-2 mt-5 text-gray-900 transition-colors duration-300 transform rounded-lg hover:bg-white/70 hover:text-gray-900 ${activeTab === 'Profile' ? 'bg-white text-gray-900' : 'bg-transparent'}`}

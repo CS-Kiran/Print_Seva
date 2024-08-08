@@ -6,6 +6,7 @@ import AvailableShops from "../components/AvailableShops";
 import Profile from "../components/Profile";
 import EditProfile from "../components/EditProfile";
 import SendRequest from "../components/SendRequest";
+import UserNotification from "../components/notifications/UserNotification";
 
 const DashboardIntro = () => {
   const { user } = useUser() as { user: String };
@@ -46,9 +47,10 @@ const UserDashboard = () => {
             {isIntroVisible && <DashboardIntro />}
             <Routes>
               <Route path="/available-shops" element={<AvailableShops />} />
+              <Route path="/send-request" element={<SendRequest />} />
+              <Route path="/notification" element={<UserNotification />} />
               <Route path="/profile" element={<Profile role="user" />} />
               <Route path="/edit-profile" element={<EditProfile role="user" />} />
-              <Route path="/send-request" element={<SendRequest />} />
             </Routes>
           </div>
         </div>

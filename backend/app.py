@@ -554,9 +554,9 @@ def update_request_status(request_id, action):
         cursor = conn.cursor()
         cursor.execute('''
             UPDATE user_request
-            SET status = ?, action = ?
+            SET status = ?, action = ?, update_time=?
             WHERE id = ?
-        ''', (status, action, request_id))
+        ''', (status, action, datetime.datetime.now(), request_id))
         conn.commit()
         conn.close()
         
@@ -565,8 +565,30 @@ def update_request_status(request_id, action):
     except Exception as e:
         print(f"Exception: {str(e)}")
         return jsonify({'error': str(e)}), 500
+    
 
+@app.route('/api/user/notifications', methods=['GET'])
+@jwt_required()
+def get_user_notifications():
+    current_user = get_jwt_identity()
 
+    # Retrieve user requests for the current user
+    notifications = query_db('''
+        SELECT id, total_pages, print_type, print_side, page_size, no_of_copies, file_path, comments, status, action, update_time, request_time
+        FROM user_request
+        WHERE user_id = (SELECT user_id FROM user WHERE email = ?)
+    ''', [current_user['email']])
+    
+    if not notifications:
+        return jsonify({'message': 'No notifications found for this user'}), 404
+
+    # Convert rows to a list of dictionaries
+    requests = [dict(row) for row in notifications]
+
+    if len(requests) == 0:
+        return jsonify({'message': 'No requests found for this shopkeeper'}), 200
+
+    return jsonify(requests), 200
 
 
 # Download file API

@@ -128,11 +128,11 @@ const SendRequest = () => {
   return (
     <>
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <button className="absolute flex flex-col justify-center items-center top-0 right-4 p-2 bg-transparent">
+        <button className="absolute animate-fadeIn flex flex-col justify-center items-center top-0 right-4 p-2 bg-transparent">
           <img src={trackRequestIcon} alt="Send Request" className="w-12 h-12 group-hover:filter group-hover:invert p-2 rounded-full hover:animate-rotate"/>
           <p className="font-medium text-sm">Track request</p>
         </button>
-        <div className="w-[40rem] max-h-full overflow-y-auto mx-auto mt-7 p-6 bg-white rounded-md shadow-md border-2 mb-8">
+        <div className="w-[40rem] animate-scaleUp max-h-full overflow-y-auto mx-auto mt-7 p-6 bg-white rounded-md shadow-md border-2 mb-8">
           <h2 className="text-3xl font-bold mb-4 text-center text-[#373a40]">
             Send Request
           </h2>
