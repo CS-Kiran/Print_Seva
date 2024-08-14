@@ -22,6 +22,8 @@ app.config['JWT_SECRET_KEY'] = 'your_print_seva_secret_key'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 app.config['FILE_ALLOWED_EXTENSIONS'] = {'pdf', 'docx', 'txt', 'png', 'jpg', 'jpeg'}
+
+
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 CORS(app)
@@ -521,12 +523,8 @@ def get_shopkeeper_requests():
     if not shopkeeper:
         return jsonify({'error': 'Shopkeeper not found or unauthorized access'}), 403
     
-    # Retrieve user requests for the shopkeeper with status 'Pending'
-    rows = query_db('''
-        SELECT id, total_pages, print_type, print_side, page_size, no_of_copies, file_path, comments, sender_email, request_time
-        FROM user_request
-        WHERE shop_id = ? AND status = 'Pending'
-    ''', [shopkeeper_id])
+    # Retrieve user requests for the shopkeeper
+    rows = query_db(''' SELECT * FROM user_request WHERE shop_id = ? AND action = 'Accepted' ''', [shopkeeper_id])
 
     if rows is None:
         return jsonify({'error': 'Error retrieving requests'}), 500
@@ -538,6 +536,7 @@ def get_shopkeeper_requests():
         return jsonify({'message': 'No requests found for this shopkeeper'}), 200
 
     return jsonify(requests), 200
+
 
 
 # Update the request status based on the shopkeeper's action
@@ -589,6 +588,69 @@ def get_user_notifications():
         return jsonify({'message': 'No requests found for this shopkeeper'}), 200
 
     return jsonify(requests), 200
+
+
+@app.route('/api/shopkeeper/pending_requests', methods=['GET'])
+@jwt_required()
+def get_pending_requests():
+    try:
+        current_user = get_jwt_identity()
+        shopkeeper_id = request.args.get('shopkeeper_id')
+        
+        # Ensure the shopkeeper_id is valid
+        if not shopkeeper_id:
+            return jsonify({'error': 'shopkeeper_id is required'}), 400
+
+        # Fetch and return requests
+        rows = query_db('''
+            SELECT id, total_pages, print_type, print_side, page_size, no_of_copies, file_path, comments, sender_email, request_time
+            FROM user_request
+            WHERE shop_id = ? AND status = 'Accepted'
+        ''', [shopkeeper_id])
+
+        if rows is None:
+            return jsonify({'error': 'Error retrieving requests'}), 500
+        
+        # Convert rows to a list of dictionaries
+        requests = [dict(row) for row in rows]
+
+        if len(requests) == 0:
+            return jsonify({'message': 'No requests found for this shopkeeper'}), 200
+
+        return jsonify(requests), 200
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+
+
+@app.route('/api/shopkeeper/update_status', methods=['POST'])
+@jwt_required()
+def update_request_status_printed():
+    data = request.get_json()
+    request_id = data.get('id')
+
+    if not request_id:
+        return jsonify({'error': 'Request ID is required'}), 400
+
+    try:
+        conn = sqlite3.connect('print_seva.db')
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE user_request
+            SET status = 'Printed', update_time = ?
+            WHERE id = ?
+        ''', (datetime.datetime.now(), request_id))
+        conn.commit()
+        conn.close()
+        
+        return jsonify({'message': 'Request status updated to Printed'}), 200
+
+    except Exception as e:
+        print(f"Exception: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 
 
 # Download file API

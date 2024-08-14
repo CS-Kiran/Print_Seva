@@ -10,7 +10,6 @@ import sendRequestIcon from "../icons/svg/send_request.svg";
 import notificationsIcon from "../icons/svg/notification.svg";
 import profileIcon from "../icons/svg/profile.svg";
 import pendingRequestIcon from "../icons/svg/pending_request.svg";
-import acceptedRequestIcon from "../icons/svg/track_request.svg";
 import logoutIcon from "../icons/svg/logout.svg";
 
 const Sidebar = ({ role }) => {
@@ -111,22 +110,14 @@ const Sidebar = ({ role }) => {
                 )}
                 {role === "shopkeeper" && (
                   <>
-                    <a
+                    <Link
                       className={`flex items-center px-4 py-2 mt-5 text-gray-900 transition-colors duration-300 transform rounded-lg hover:bg-white/70 hover:text-gray-900 ${activeTab === 'Pending Request' ? 'bg-white text-gray-900' : 'bg-transparent'}`}
-                      href="#"
+                      to="/shopkeeper-dashboard/pending-request"
                       onClick={() => handleTabClick('Pending Request')}
                     >
                       <img src={pendingRequestIcon} alt="Pending Request" className="w-7 h-7 group-hover:filter group-hover:invert" />
                       <span className="mx-4 font-medium">Pending Request</span>
-                    </a>
-                    <a
-                      className={`flex items-center px-4 py-2 mt-5 text-gray-900 transition-colors duration-300 transform rounded-lg hover:bg-white/70 hover:text-gray-900 ${activeTab === 'Track Request' ? 'bg-white text-gray-900' : 'bg-transparent'}`}
-                      href="#"
-                      onClick={() => handleTabClick('Track Request')}
-                    >
-                      <img src={acceptedRequestIcon} alt="Track Request" className="w-7 h-7 group-hover:filter group-hover:invert" />
-                      <span className="mx-4 font-medium">Track Request</span>
-                    </a>
+                    </Link>
                     <Link
                       to="/shopkeeper-dashboard/notification"
                       className={`flex items-center px-4 py-2 mt-5 text-gray-900 transition-colors duration-300 transform rounded-lg hover:bg-white/70 hover:text-gray-900 ${activeTab === 'Notifications' ? 'bg-white text-gray-900' : 'bg-transparent'}`}

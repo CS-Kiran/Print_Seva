@@ -96,7 +96,6 @@ const ShopkeeperNotification = () => {
   return (
     <div className="min-h-screen flex flex-col items-center">
       <h2 className="text-3xl font-bold mt-10 mb-6 animate-scaleUp">Shopkeeper Notifications</h2>
-      {error && <p className="text-red-500">{error}</p>}
       <div className="w-[50%] max-w-4xl p-6 bg-white shadow-md rounded-md animate-fadeIn">
         {requests.length === 0 ? (
           <p className="text-gray-500">No requests available.</p>

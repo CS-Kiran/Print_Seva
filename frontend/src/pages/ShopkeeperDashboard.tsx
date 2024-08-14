@@ -8,6 +8,7 @@ import SideBar from "../components/SideBar";
 import Profile from "../components/Profile";
 import EditProfile from "../components/EditProfile";
 import ShopkeeperNotification from "../components/notifications/ShopkeeperNotification";
+import PendingRequest from "../components/PendingRequest";
 
 const DashboardIntro = () => {
   const { shopkeeper } = useShopkeeper();
@@ -48,6 +49,7 @@ const ShopkeeperDashboard = () => {
           <div className="flex-grow overflow-auto">
             {isIntroVisible && <DashboardIntro />}
             <Routes>
+              <Route path="/pending-request" element={<PendingRequest />} />
               <Route path="/notification" element={<ShopkeeperNotification />} />
               <Route path="/profile" element={<Profile role="shopkeeper" />} />
               <Route path="/edit-profile" element={<EditProfile role="shopkeeper" />} />

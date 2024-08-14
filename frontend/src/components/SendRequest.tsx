@@ -132,7 +132,7 @@ const SendRequest = () => {
           <img src={trackRequestIcon} alt="Send Request" className="w-12 h-12 group-hover:filter group-hover:invert p-2 rounded-full hover:animate-rotate"/>
           <p className="font-medium text-sm">Track request</p>
         </button>
-        <div className="w-[40rem] animate-scaleUp max-h-full overflow-y-auto mx-auto mt-7 p-6 bg-white rounded-md shadow-md border-2 mb-8">
+        <div className="w-[40rem] animate-fadeIn max-h-full overflow-y-auto mx-auto mt-7 p-6 bg-white rounded-md shadow-md border-2 mb-8">
           <h2 className="text-3xl font-bold mb-4 text-center text-[#373a40]">
             Send Request
           </h2>
