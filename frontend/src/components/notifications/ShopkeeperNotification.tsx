@@ -36,7 +36,7 @@ const ShopkeeperNotification = () => {
               },
             }
           );
-            
+          console.log(response.data);
           if (Array.isArray(response.data)) {
             setRequests(response.data);
           } else {
@@ -95,13 +95,14 @@ const ShopkeeperNotification = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center">
-      <h2 className="text-3xl font-bold mt-10 mb-6 animate-scaleUp">Shopkeeper Notifications</h2>
+      <h2 className="text-3xl font-bold mt-10 mb-6 animate-scaleUp">Notifications</h2>
       <div className="w-[50%] max-w-4xl p-6 bg-white shadow-md rounded-md animate-fadeIn">
         {requests.length === 0 ? (
           <p className="text-gray-500">No requests available.</p>
         ) : (
           requests.map((request) => (
             <div key={request.id} className="p-4 mb-4 bg-gray-50 border rounded-md">
+              <p className='font-bold'><strong>Request ID:</strong> {request.id}</p>
               <p><strong>Sender's Email:</strong> {request.sender_email}</p>
               <p><strong>Total Pages:</strong> {request.total_pages}</p>
               <p><strong>Print Type:</strong> {request.print_type.toUpperCase()}</p>
