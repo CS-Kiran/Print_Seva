@@ -659,7 +659,7 @@ def update_request_status_printed():
 
 
 # Download file API
-@app.route('/api/shopkeeper/download/uploads/<path:filename>', methods=['GET'])
+@app.route('/api/download/uploads/<path:filename>', methods=['GET'])
 @jwt_required()
 def download_file(filename):
     current_user = get_jwt_identity()

@@ -2,24 +2,18 @@ import { useEffect, useState } from "react";
 import { useAlert } from '../../context/AlertContext';
 import axios from "axios";
 import paymentIcon from "../../icons/svg/payment.svg";
+import UpdateRequest from '../UpdateRequest';
 
 interface UserNotification {
   id: number;
-  total_pages: number;
-  print_type: string;
-  print_side: string;
-  page_size: string;
-  no_of_copies: number;
-  file_path: string;
-  comments: string;
   status: string;
   action: string;
-  request_time: string;
-  update_time: string;
+  file_path: string;
 }
 
 const UserNotification = () => {
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
+  const [editingRequestId, setEditingRequestId] = useState<number | null>(null);
   const { showAlert } = useAlert();
 
   useEffect(() => {
@@ -52,7 +46,7 @@ const UserNotification = () => {
     };
 
     fetchNotifications();
-  });
+  }, []);
 
   const getActionColor = (action: string) => {
     switch (action) {
@@ -81,21 +75,22 @@ const UserNotification = () => {
   };
 
   const handleEdit = (id: number) => {
-    // Implement edit functionality here
-    console.log(`Editing request with ID: ${id}`);
+    setEditingRequestId(id);
   };
 
   const handleDelete = (id: number) => {
-    // Implement delete functionality here
     console.log(`Deleting request with ID: ${id}`);
+    // Implement delete functionality here
+  };
+
+  const handleCloseUpdateCard = () => {
+    setEditingRequestId(null);
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center">
-      <h2 className="text-3xl font-bold mt-10 mb-6 animate-scaleUp">
-        Notifications
-      </h2>
-      <div className="w-full max-w-4xl p-6 bg-white shadow-md rounded-md animate-fadeIn">
+    <div className="min-h-screen flex flex-col items-center bg-gray-100 py-8">
+      <h2 className="text-3xl font-bold mb-6">Notifications</h2>
+      <div className="w-full max-w-3xl bg-white shadow-md rounded-md p-4">
         {notifications.length === 0 ? (
           <p className="text-gray-500">No notifications available.</p>
         ) : (
@@ -109,61 +104,25 @@ const UserNotification = () => {
                   Notification ID: {notification.id}
                 </h3>
               </div>
-              <p>
-                <strong>Total Pages:</strong> {notification.total_pages}
+              <p className={`font-semibold ${getStatusColor(notification.status)}`}>
+                <strong>Status:</strong> {notification.status}
               </p>
-              <p>
-                <strong>Print Type:</strong> {notification.print_type}
-              </p>
-              <p>
-                <strong>Print Side:</strong> {notification.print_side}
-              </p>
-              <p>
-                <strong>Page Size:</strong> {notification.page_size}
-              </p>
-              <p>
-                <strong>Number of Copies:</strong> {notification.no_of_copies}
-              </p>
-              <p>
-                <strong>Comments:</strong>{" "}
-                {notification.comments || "No Comments Added"}
+              <p className={`font-semibold ${getActionColor(notification.action)}`}>
+                <strong>Action:</strong> {notification.action}
               </p>
               <p>
                 <strong>File Path:</strong>{" "}
                 <a
                   href={notification.file_path}
-                  className="text-blue-500"
+                  className="text-blue-500 hover:underline"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   View File
                 </a>
               </p>
-              <p
-                className={`mt-2 ${getStatusColor(
-                  notification.status
-                )} font-semibold`}
-              >
-                <strong>Status:</strong> {notification.status}
-              </p>
-              <p
-                className={`mt-2 ${getActionColor(
-                  notification.action
-                )} font-semibold`}
-              >
-                <strong>Action:</strong> {notification.action}
-              </p>
-              <p>
-                <strong>Request Time:</strong>{" "}
-                {new Date(notification.request_time).toLocaleString()}
-              </p>
-              <p>
-                <strong>Update Time:</strong>{" "}
-                {new Date(notification.update_time).toLocaleString()}
-              </p>
               {notification.action === "Accepted" &&
-                (notification.status === "Responded" ||
-                  notification.status === "Printed") && (
+                (notification.status === "Responded" || notification.status === "Printed") && (
                   <div className="absolute bottom-4 right-4">
                     <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-300 flex items-center space-x-2 group">
                       <img
@@ -175,27 +134,33 @@ const UserNotification = () => {
                     </button>
                   </div>
                 )}
-              {notification.action === "Pending" &&
-                notification.status === "Pending" && (
-                  <div className="absolute bottom-4 right-4 flex space-x-2">
-                    <button
-                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300"
-                      onClick={() => handleEdit(notification.id)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-300"
-                      onClick={() => handleDelete(notification.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
+              {notification.action === "Pending" && (
+                <div className="absolute bottom-4 right-4 flex space-x-2">
+                  <button
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-300"
+                    onClick={() => handleEdit(notification.id)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-300"
+                    onClick={() => handleDelete(notification.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           ))
         )}
       </div>
+
+      {editingRequestId !== null && (
+        <UpdateRequest
+          requestId={editingRequestId}
+          onClose={handleCloseUpdateCard}
+        />
+      )}
     </div>
   );
 };

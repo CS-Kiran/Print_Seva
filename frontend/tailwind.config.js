@@ -12,6 +12,7 @@ export default {
         scaleUp: 'scaleUp 1s ease-out',
         rotate: 'rotate 4s linear infinite',
         colorChange: 'colorChange 1s ease-out',
+        fluidProgress: "fluidProgress 2s ease-in-out",
       },
       keyframes: {
         movePendulum: {
@@ -55,6 +56,11 @@ export default {
         colorChange: {
           '0%': { color: '#000' },
           '100%': { color: '#ff6347' }, 
+        },
+        fluidProgress: {
+          '0%': { width: '0%', transform: 'scaleX(0)' },
+          '50%': { width: '50%', transform: 'scaleX(1)' },
+          '100%': { width: '100%', transform: 'scaleX(1)' },
         },
       },
     },

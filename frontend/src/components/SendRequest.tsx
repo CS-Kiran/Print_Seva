@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useUser } from '../context/UserContext';
+import { useUser } from "../context/UserContext";
 import { useAlert } from "../context/AlertContext";
 import trackRequestIcon from "../icons/svg/track_request.svg";
+import { Link } from "react-router-dom";
 
 interface FormData {
   totalPages: number;
@@ -33,7 +34,7 @@ const initialFormData: FormData = {
   no_of_copies: 1,
   shop_name: "",
   file: null,
-  comments: ""
+  comments: "",
 };
 
 const SendRequest = () => {
@@ -46,11 +47,11 @@ const SendRequest = () => {
   useEffect(() => {
     const fetchShops = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/api/shops');
+        const response = await axios.get("http://127.0.0.1:5000/api/shops");
         setShops(response.data);
       } catch (error) {
         showAlert("warning", "Error fetching shops.");
-        console.error('Error fetching shops:', error);
+        console.error("Error fetching shops:", error);
       }
     };
 
@@ -58,7 +59,9 @@ const SendRequest = () => {
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -80,58 +83,77 @@ const SendRequest = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const { totalPages, printType, printSide, pageSize, no_of_copies, shop_name, file, comments } = formData;
+    const {
+      totalPages,
+      printType,
+      printSide,
+      pageSize,
+      no_of_copies,
+      shop_name,
+      file,
+      comments,
+    } = formData;
 
     if (!file) {
-      console.error('No file selected');
+      console.error("No file selected");
       return;
     }
 
     const formDataToSend = new FormData();
-    formDataToSend.append('total_pages', String(totalPages));
-    formDataToSend.append('print_type', printType);
-    formDataToSend.append('print_side', printSide);
-    formDataToSend.append('page_size', pageSize);
-    formDataToSend.append('no_of_copies', String(no_of_copies));
-    formDataToSend.append('shop_name', shop_name);
-    formDataToSend.append('file', file);
-    formDataToSend.append('comments', comments);
+    formDataToSend.append("total_pages", String(totalPages));
+    formDataToSend.append("print_type", printType);
+    formDataToSend.append("print_side", printSide);
+    formDataToSend.append("page_size", pageSize);
+    formDataToSend.append("no_of_copies", String(no_of_copies));
+    formDataToSend.append("shop_name", shop_name);
+    formDataToSend.append("file", file);
+    formDataToSend.append("comments", comments);
 
     const token = localStorage.getItem("user_token");
 
     if (!token) {
-      console.error('No user token found');
+      console.error("No user token found");
       return;
     }
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/api/user_request', formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`,
+      const response = await axios.post(
+        "http://127.0.0.1:5000/api/user_request",
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
       if (response.status === 201) {
         showAlert("success", "Print request submitted successfully");
         setFormData(initialFormData);
         setFileSize(null);
       } else {
         showAlert("warning", "Error submitting print request");
-        console.error('Error submitting print request:', response.statusText);
+        console.error("Error submitting print request:", response.statusText);
       }
     } catch (error) {
       showAlert("warning", "Error submitting print request");
-      console.error('Error submitting print request:', error);
+      console.error("Error submitting print request:", error);
     }
   };
 
   return (
     <>
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <button className="absolute animate-fadeIn flex flex-col justify-center items-center top-0 right-4 p-2 bg-transparent">
-          <img src={trackRequestIcon} alt="Send Request" className="w-12 h-12 group-hover:filter group-hover:invert p-2 rounded-full hover:animate-rotate"/>
-          <p className="font-medium text-sm">Track request</p>
-        </button>
+        <Link to="/user-dashboard/track-request">
+          <button className="absolute animate-fadeIn flex flex-col justify-center items-center top-0 right-4 p-2 bg-transparent">
+            <img
+              src={trackRequestIcon}
+              alt="Send Request"
+              className="w-12 h-12 group-hover:filter group-hover:invert p-2 rounded-full hover:animate-rotate"
+            />
+            <p className="font-medium text-sm">Track request</p>
+          </button>
+        </Link>
         <div className="w-[40rem] animate-fadeIn max-h-full overflow-y-auto mx-auto mt-7 p-6 bg-white rounded-md shadow-md border-2 mb-8">
           <h2 className="text-3xl font-bold mb-4 text-center text-[#373a40]">
             Send Request
@@ -157,8 +179,12 @@ const SendRequest = () => {
                 onChange={handleChange}
                 className="w-full px-4 py-2 border bg-transparent rounded-full"
               >
-                <option value="color" className="my-2">Color</option>
-                <option value="black&white" className="my-2">Black & White</option>
+                <option value="color" className="my-2">
+                  Color
+                </option>
+                <option value="black&white" className="my-2">
+                  Black & White
+                </option>
               </select>
             </div>
             <div className="mb-4">
@@ -210,7 +236,9 @@ const SendRequest = () => {
               >
                 <option value="">Select Shop</option>
                 {shops.map((shop, index) => (
-                  <option key={index} value={shop.shop_name}>{shop.shop_name}</option>
+                  <option key={index} value={shop.shop_name}>
+                    {shop.shop_name}
+                  </option>
                 ))}
               </select>
             </div>

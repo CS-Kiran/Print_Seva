@@ -48,7 +48,7 @@ const ShopkeeperNotification = () => {
             showAlert('success', 'Requests fetched successfully');
           } else {
             setRequests([]);  // Set to an empty array if unexpected format
-            showAlert('error', 'Unexpected response format');
+            showAlert('info', 'No request found');
           }
         } catch (error) {
           console.error('Error fetching requests:', error);
@@ -78,7 +78,7 @@ const ShopkeeperNotification = () => {
 
   const downloadFile = async (filePath: string) => {
     try {
-      const url = `http://127.0.0.1:5000/api/shopkeeper/download/${encodeURIComponent(filePath)}`;
+      const url = `http://127.0.0.1:5000/api/download/${encodeURIComponent(filePath)}`;
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('shopkeeper_token')}`,
