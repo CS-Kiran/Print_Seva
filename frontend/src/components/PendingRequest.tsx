@@ -12,15 +12,19 @@ interface Request {
 
 const PendingRequest = () => {
   const [requests, setRequests] = useState<Request[]>([]);
-  const [readyToPrintIndex, setReadyToPrintIndex] = useState<number | null>(null);
-  const [downloadedIndexes, setDownloadedIndexes] = useState<Set<number>>(new Set());
+  const [readyToPrintIndex, setReadyToPrintIndex] = useState<number | null>(
+    null
+  );
+  const [downloadedIndexes, setDownloadedIndexes] = useState<Set<number>>(
+    new Set()
+  );
   const { shopkeeper } = useShopkeeper();
 
   useEffect(() => {
     if (shopkeeper?.shopkeeper_id) {
       fetchPendingRequests();
     }
-  }, [shopkeeper]);
+  }, [shopkeeper?.shopkeeper_id]);
 
   const fetchPendingRequests = async () => {
     if (!shopkeeper?.shopkeeper_id) {
@@ -29,17 +33,16 @@ const PendingRequest = () => {
     }
 
     try {
-      const response = await axios.post(
-        "http://127.0.0.1:5000/api/shopkeeper/requests",
-        { shopkeeper_id: shopkeeper.shopkeeper_id },
+      const response = await axios.get(
+        "http://127.0.0.1:5000/api/shopkeeper/pending_requests",
         {
+          params: { shopkeeper_id: shopkeeper.shopkeeper_id },
           headers: {
             Authorization: `Bearer ${localStorage.getItem("shopkeeper_token")}`,
           },
         }
       );
 
-      // Assuming the response is an array of requests
       const requestsData = response.data;
 
       if (Array.isArray(requestsData)) {
@@ -61,9 +64,16 @@ const PendingRequest = () => {
 
     const requestId = requests[index].id;
     try {
-      await axios.post("http://127.0.0.1:5000/api/shopkeeper/update_status", {
-        id: requestId,
-      });
+      await axios.post(
+        "http://127.0.0.1:5000/api/shopkeeper/update_status",
+        { id: requestId }, // Passing the request ID in the request body
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("shopkeeper_token")}`,
+            "Content-Type": "application/json", // Ensure the request is sent as JSON
+          },
+        }
+      );
 
       updateRequestStatus(index, "Printed");
       console.log(`Request ${index} status changed to Printed`);
@@ -103,16 +113,26 @@ const PendingRequest = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-3.5 text-lg font-normal text-left text-gray-500">Sender's Email</th>
-              <th className="px-4 py-3.5 text-lg font-normal text-left text-gray-500">File</th>
-              <th className="px-4 py-3.5 text-lg font-normal text-left text-gray-500">Status</th>
-              <th className="px-4 py-3.5 text-lg font-normal text-left text-gray-500">Timestamp</th>
+              <th className="px-4 py-3.5 text-lg font-normal text-left text-gray-500">
+                Sender's Email
+              </th>
+              <th className="px-4 py-3.5 text-lg font-normal text-left text-gray-500">
+                File
+              </th>
+              <th className="px-4 py-3.5 text-lg font-normal text-left text-gray-500">
+                Status
+              </th>
+              <th className="px-4 py-3.5 text-lg font-normal text-left text-gray-500">
+                Timestamp
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {requests.map((request, index) => (
               <tr key={request.id}>
-                <td className="px-4 py-4 text-sm font-medium text-gray-700">{request.sender_email}</td>
+                <td className="px-4 py-4 text-sm font-medium text-gray-700">
+                  {request.sender_email}
+                </td>
                 <td className="px-4 py-4 text-sm text-gray-700">
                   <a
                     href={request.file_path}
@@ -126,7 +146,7 @@ const PendingRequest = () => {
                   </a>
                 </td>
                 <td className="px-4 py-4 text-sm">
-                  {request.status === "Pending" ? (
+                  {request.status === "Responded" ? (
                     readyToPrintIndex === index ? (
                       <button
                         onClick={() => handleStatusChange(index)}
@@ -142,16 +162,28 @@ const PendingRequest = () => {
                           className="form-checkbox h-5 w-5 text-yellow-600 transition duration-150 ease-in-out"
                           disabled={!downloadedIndexes.has(index)}
                         />
-                        <span className={`text-sm ${downloadedIndexes.has(index) ? 'text-yellow-600' : 'text-gray-400'}`}>
-                          {downloadedIndexes.has(index) ? 'Pending' : 'Download file first'}
+                        <span
+                          className={`text-sm ${
+                            downloadedIndexes.has(index)
+                              ? "text-yellow-600"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {downloadedIndexes.has(index)
+                            ? "Pending"
+                            : "Download file first"}
                         </span>
                       </label>
                     )
                   ) : (
-                    <span className="text-md text-green-600 font-semibold">{request.status}</span>
+                    <span className="text-md text-green-600 font-semibold">
+                      {request.status}
+                    </span>
                   )}
                 </td>
-                <td className="px-4 py-4 text-sm text-gray-700">{request.request_time || 'N/A'}</td>
+                <td className="px-4 py-4 text-sm text-gray-700">
+                  {request.request_time || "N/A"}
+                </td>
               </tr>
             ))}
           </tbody>

@@ -91,7 +91,9 @@ const UserNotification = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center">
-      <h2 className="text-3xl font-bold mt-10 mb-6 animate-scaleUp">Notifications</h2>
+      <h2 className="text-3xl font-bold mt-10 mb-6 animate-scaleUp">
+        Notifications
+      </h2>
       {error && <p className="text-red-500">{error}</p>}
       <div className="w-full max-w-4xl p-6 bg-white shadow-md rounded-md animate-fadeIn">
         {notifications.length === 0 ? (
@@ -160,7 +162,8 @@ const UserNotification = () => {
                 {new Date(notification.update_time).toLocaleString()}
               </p>
               {notification.action === "Accepted" &&
-                notification.status === "Responded" && (
+                (notification.status === "Responded" ||
+                  notification.status === "Printed") && (
                   <div className="absolute bottom-4 right-4">
                     <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-300 flex items-center space-x-2 group">
                       <img

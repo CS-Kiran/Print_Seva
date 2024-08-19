@@ -26,7 +26,10 @@ const ShopkeeperNotification = () => {
             setError('Shopkeeper ID is not available');
             return;
           }
-      
+  
+          // Debug log: before sending the request
+          console.log(`Fetching requests for shopkeeper_id: ${shopkeeper.shopkeeper_id}`);
+  
           const response = await axios.post(
             `http://127.0.0.1:5000/api/shopkeeper/requests`,
             { shopkeeper_id: shopkeeper.shopkeeper_id },
@@ -36,7 +39,9 @@ const ShopkeeperNotification = () => {
               },
             }
           );
-          console.log(response.data);
+  
+          console.log('Response received:', response.data);
+  
           if (Array.isArray(response.data)) {
             setRequests(response.data);
           } else {
@@ -49,10 +54,10 @@ const ShopkeeperNotification = () => {
           setError('Error fetching requests');
         }
       };
-      
-
+  
     fetchRequests();
   }, [shopkeeper]);
+  
 
   const handleAction = async (id: number, action: 'accept' | 'decline') => {
     try {
