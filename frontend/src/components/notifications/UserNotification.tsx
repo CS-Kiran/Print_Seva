@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useAlert } from '../../context/AlertContext';
 import axios from "axios";
 import paymentIcon from "../../icons/svg/payment.svg";
 
@@ -19,14 +20,14 @@ interface UserNotification {
 
 const UserNotification = () => {
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const { showAlert } = useAlert();
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         const token = localStorage.getItem("user_token");
         if (!token) {
-          setError("Authorization token not found");
+          showAlert('error', 'Authorization token not found');
           return;
         }
 
@@ -42,16 +43,16 @@ const UserNotification = () => {
         if (response.status === 200) {
           setNotifications(response.data);
         } else {
-          setError("No notifications found");
+          showAlert('warning', 'No notifications found');
         }
       } catch (error) {
         console.error("Error fetching notifications:", error);
-        setError("Error fetching notifications");
+        showAlert('warning', 'Error fetching notifications');
       }
     };
 
     fetchNotifications();
-  }, []);
+  });
 
   const getActionColor = (action: string) => {
     switch (action) {
@@ -94,7 +95,6 @@ const UserNotification = () => {
       <h2 className="text-3xl font-bold mt-10 mb-6 animate-scaleUp">
         Notifications
       </h2>
-      {error && <p className="text-red-500">{error}</p>}
       <div className="w-full max-w-4xl p-6 bg-white shadow-md rounded-md animate-fadeIn">
         {notifications.length === 0 ? (
           <p className="text-gray-500">No notifications available.</p>

@@ -3,6 +3,7 @@ import { useUser } from '../context/UserContext';
 import { useShopkeeper } from '../context/ShopkeeperContext';
 import { useNavigate } from 'react-router-dom';
 
+
 interface ProfileProps {
   role: 'user' | 'shopkeeper';
 }

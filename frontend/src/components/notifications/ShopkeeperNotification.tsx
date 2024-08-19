@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useShopkeeper } from '../../context/ShopkeeperContext';
+import { useAlert } from '../../context/AlertContext';
 import axios from 'axios';
 
 interface UserRequest {
@@ -16,14 +17,14 @@ interface UserRequest {
 
 const ShopkeeperNotification = () => {
   const [requests, setRequests] = useState<UserRequest[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const { shopkeeper } = useShopkeeper();
+  const { showAlert } = useAlert();
 
   useEffect(() => {
     const fetchRequests = async () => {
         try {
           if (!shopkeeper) {
-            setError('Shopkeeper ID is not available');
+            showAlert('error', 'Shopkeeper ID is not available');
             return;
           }
   
@@ -44,14 +45,15 @@ const ShopkeeperNotification = () => {
   
           if (Array.isArray(response.data)) {
             setRequests(response.data);
+            showAlert('success', 'Requests fetched successfully');
           } else {
             setRequests([]);  // Set to an empty array if unexpected format
-            setError('Unexpected response format');
+            showAlert('error', 'Unexpected response format');
           }
         } catch (error) {
           console.error('Error fetching requests:', error);
           setRequests([]);  // Ensure requests is an array
-          setError('Error fetching requests');
+          showAlert('error', 'Error fetching requests');
         }
       };
   
@@ -67,9 +69,10 @@ const ShopkeeperNotification = () => {
         },
       });
       setRequests(requests.filter(request => request.id !== id));
+      showAlert('success', `Request ${action}ed successfully`);
     } catch (error) {
       console.error(`Error ${action} request:`, error);
-      setError(`Error ${action} request`);
+      showAlert('error', `Error ${action}ing request`);
     }
   };
 
@@ -94,7 +97,7 @@ const ShopkeeperNotification = () => {
       window.URL.revokeObjectURL(blobUrl); // Clean up the URL object
     } catch (error) {
       console.error('Error downloading file:', error);
-      setError('Error downloading file');
+      showAlert('error', 'Error downloading file');
     }
   };
 
