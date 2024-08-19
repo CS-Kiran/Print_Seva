@@ -524,7 +524,7 @@ def get_shopkeeper_requests():
         return jsonify({'error': 'Shopkeeper not found or unauthorized access'}), 403
     
     # Retrieve user requests for the shopkeeper
-    rows = query_db(''' SELECT * FROM user_request WHERE shop_id = ? AND action = 'Accepted' ''', [shopkeeper_id])
+    rows = query_db(''' SELECT * FROM user_request WHERE shop_id = ? AND status = 'Pending' ''', [shopkeeper_id])
 
     if rows is None:
         return jsonify({'error': 'Error retrieving requests'}), 500
@@ -603,9 +603,9 @@ def get_pending_requests():
 
         # Fetch and return requests
         rows = query_db('''
-            SELECT id, total_pages, print_type, print_side, page_size, no_of_copies, file_path, comments, sender_email, request_time
+            SELECT id, total_pages, print_type, print_side, page_size, no_of_copies, file_path, comments, status, sender_email, request_time
             FROM user_request
-            WHERE shop_id = ? AND status = 'Accepted'
+            WHERE shop_id = ? AND status = 'Responded' AND action = 'Accepted'
         ''', [shopkeeper_id])
 
         if rows is None:
@@ -625,32 +625,37 @@ def get_pending_requests():
 
 
 
+# Endpoint to update request status
 @app.route('/api/shopkeeper/update_status', methods=['POST'])
 @jwt_required()
 def update_request_status_printed():
     data = request.get_json()
-    request_id = data.get('id')
-
+    request_id = data.get('id')  # Get the request ID from the JSON body
+    
+    # Ensure the request_id is valid
     if not request_id:
-        return jsonify({'error': 'Request ID is required'}), 400
-
+        return jsonify({'error': 'request_id is required'}), 400
+    
     try:
+        current_user = get_jwt_identity()
+
+        status = 'Printed'
+
         conn = sqlite3.connect('print_seva.db')
         cursor = conn.cursor()
         cursor.execute('''
             UPDATE user_request
-            SET status = 'Printed', update_time = ?
+            SET status = ?, update_time = ?
             WHERE id = ?
-        ''', (datetime.datetime.now(), request_id))
+        ''', (status, datetime.datetime.now(), request_id))
         conn.commit()
         conn.close()
         
-        return jsonify({'message': 'Request status updated to Printed'}), 200
+        return jsonify({'message': 'Request updated successfully'}), 200
 
     except Exception as e:
         print(f"Exception: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
 
 
 # Download file API
