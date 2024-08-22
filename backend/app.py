@@ -728,7 +728,24 @@ def update_request(request_id):
         print(f"Error updating request: {e}")
         return jsonify({"error": "An error occurred while updating request"}), 500
 
+
+@app.route('/api/user/requests/<int:request_id>', methods=['DELETE'])
+def delete_request(request_id):
+    try:
+        request_to_delete = query_db('SELECT * FROM user_request WHERE id = ?', [request_id], one=True)
+        
+        if not request_to_delete:
+            return jsonify({"error": "Request not found"}), 404
+
+        # Perform the deletion
+        query_db('DELETE FROM user_request WHERE id = ?', [request_id])
+
+        return jsonify({"message": "Request deleted successfully", "request_id": request_id}), 200
     
+    except Exception as e:
+        print(f"Error deleting request: {e}")
+        return jsonify({"error": "An error occurred while deleting the request"}), 500
+
 # Download file API
 @app.route('/api/download/uploads/<path:filename>', methods=['GET'])
 @jwt_required()

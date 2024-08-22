@@ -70,10 +70,43 @@ const UserNotification = () => {
   };
 
   const handleEdit = (id: number) => setEditingRequestId(id);
-  const handleDelete = (id: number) => {
-    console.log(`Deleting request with ID: ${id}`);
-    // Implement delete functionality here
+  const handleDelete = async (id: number) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete this request with ID = ${id}?`
+    );
+
+    if (confirmed) {
+      try {
+        const token = localStorage.getItem("user_token");
+        if (!token) {
+          showAlert("error", "Authorization token not found");
+          return;
+        }
+
+        const response = await axios.delete(
+          `http://127.0.0.1:5000/api/user/requests/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          showAlert("success", "Request deleted successfully");
+          setNotifications((prevNotifications) =>
+            prevNotifications.filter((notification) => notification.id !== id)
+          );
+        } else {
+          showAlert("error", "Failed to delete the request");
+        }
+      } catch (error) {
+        console.error("Error deleting request:", error);
+        showAlert("error", "An error occurred while deleting the request");
+      }
+    }
   };
+
   const handleToggleExpand = (id: number) => {
     setExpandedNotificationId((prevId) => (prevId === id ? null : id));
   };
