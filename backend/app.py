@@ -658,6 +658,77 @@ def update_request_status_printed():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/user/requests/<int:request_id>', methods=['GET'])
+def get_request_details(request_id):
+    try:
+        # Fetch the request from the database
+        user_request = query_db(''' SELECT * FROM user_request WHERE id = ? LIMIT 1''', [request_id], one=True)
+        
+        if not user_request:
+            return jsonify({"error": "Request not found"}), 404
+
+        # Convert the request object to a dictionary
+        request_data = {
+            "id": user_request['id'],
+            "total_pages": user_request['total_pages'],
+            "print_type": user_request['print_type'],
+            "print_side": user_request['print_side'],
+            "page_size": user_request['page_size'],
+            "no_of_copies": user_request['no_of_copies'],
+            "comments": user_request['comments'],
+            "status": user_request['status'],
+            "action": user_request['action'],
+            "request_time": user_request['request_time'],
+            "update_time": user_request['update_time']
+        }
+        return jsonify(request_data), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/user/requests/update/<int:request_id>', methods=['PUT'])
+def update_request(request_id):
+    data = request.get_json()
+    try:
+        # Update the fields if they exist in the request data
+        if 'total_pages' in data:
+            query_db('UPDATE user_request SET total_pages = ? WHERE id = ?', [data['total_pages'], request_id])
+        if 'print_type' in data:
+            query_db('UPDATE user_request SET print_type = ? WHERE id = ?', [data['print_type'], request_id])
+        if 'print_side' in data:
+            query_db('UPDATE user_request SET print_side = ? WHERE id = ?', [data['print_side'], request_id])
+        if 'page_size' in data:
+            query_db('UPDATE user_request SET page_size = ? WHERE id = ?', [data['page_size'], request_id])
+        if 'no_of_copies' in data:
+            query_db('UPDATE user_request SET no_of_copies = ? WHERE id = ?', [data['no_of_copies'], request_id])
+        if 'comments' in data:
+            query_db('UPDATE user_request SET comments = ? WHERE id = ?', [data['comments'], request_id])
+        
+        # Update the request time to the current time
+        query_db('UPDATE user_request SET update_time = ? WHERE id = ?', [datetime.datetime.now(), request_id])
+        
+        # Fetch the updated request data
+        updated_request = query_db('SELECT * FROM user_request WHERE id = ?', [request_id], one=True)
+        
+        if updated_request:
+            request_data = {
+                'id': updated_request['id'],
+                'user_id': updated_request['user_id'],
+                'total_pages': updated_request['total_pages'],
+                'print_type': updated_request['print_type'],
+                'print_side': updated_request['print_side'],
+                'page_size': updated_request['page_size'],
+                'no_of_copies': updated_request['no_of_copies'],
+                'comments': updated_request['comments'],
+                'update_time': updated_request['update_time']
+            }
+            return jsonify({"message": "Request updated successfully", "request": request_data}), 200
+        
+    except Exception as e:
+        print(f"Error updating request: {e}")
+        return jsonify({"error": "An error occurred while updating request"}), 500
+
+    
 # Download file API
 @app.route('/api/download/uploads/<path:filename>', methods=['GET'])
 @jwt_required()

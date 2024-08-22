@@ -1,19 +1,30 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAlert } from '../context/AlertContext';
 
 interface UpdateRequestProps {
   requestId: number;
   onClose: () => void;
 }
 
+// Define interfaces for request data and form data
+interface RequestData {
+  total_pages: number;
+  print_type: string;
+  print_side: string;
+  page_size: string;
+  no_of_copies: number;
+  comments: string;
+}
+
 const UpdateRequest = ({ requestId, onClose }: UpdateRequestProps) => {
-  const [requestData, setRequestData] = useState<any | null>(null);
-  const [formData, setFormData] = useState<any>({
-    total_pages: '',
-    print_type: '',
-    print_side: '',
-    page_size: '',
-    no_of_copies: '',
+  const { showAlert } = useAlert();
+  const [formData, setFormData] = useState<RequestData>({
+    total_pages: 0,
+    print_type: 'black&white',
+    print_side: 'single',
+    page_size: 'A4',
+    no_of_copies: 0,
     comments: '',
   });
   const [loading, setLoading] = useState(false);
@@ -29,38 +40,66 @@ const UpdateRequest = ({ requestId, onClose }: UpdateRequestProps) => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setRequestData(response.data);
-        setFormData(response.data);
+        console.log('Request data:', response.data);
+
+        // Update formData with the fetched request data
+        setFormData({
+          total_pages: response.data.total_pages || 0,
+          print_type: response.data.print_type || 'black&white',
+          print_side: response.data.print_side || 'single',
+          page_size: response.data.page_size || 'A4',
+          no_of_copies: response.data.no_of_copies || 0,
+          comments: response.data.comments || '',
+        });
       } catch (error) {
         console.error('Error fetching request data:', error);
+        showAlert('error', 'Failed to fetch request data.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchRequestData();
-  }, [requestId]);
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (name === 'date_field') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: new Date(value).toISOString(),
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Filter out empty or null values from formData
+    const updatedData = Object.fromEntries(
+      Object.entries(formData).filter(([value]) => value !== '' && value !== null)
+    );
+
     try {
       const token = localStorage.getItem('user_token');
       await axios.put(
-        `http://127.0.0.1:5000/api/user/requests/${requestId}`,
-        formData,
+        `http://127.0.0.1:5000/api/user/requests/update/${requestId}`,
+        updatedData,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      onClose(); // Close the modal on successful update
+      showAlert('success', 'Request updated successfully.');
+      onClose(); 
     } catch (error) {
       console.error('Error updating request:', error);
+      showAlert('error', 'Failed to update request.');
     } finally {
       setLoading(false);
     }
@@ -105,36 +144,41 @@ const UpdateRequest = ({ requestId, onClose }: UpdateRequestProps) => {
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Print Type</label>
-            <input
-              type="text"
+            <select
               name="print_type"
               value={formData.print_type}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              required
-            />
+            >
+              <option value="color">Color</option>
+              <option value="black&white">Black & White</option>
+            </select>
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Print Side</label>
-            <input
-              type="text"
+            <select
               name="print_side"
               value={formData.print_side}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              required
-            />
+            >
+              <option value="single">Single Sided</option>
+              <option value="double">Double Sided</option>
+            </select>
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Page Size</label>
-            <input
-              type="text"
+            <select
               name="page_size"
               value={formData.page_size}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              required
-            />
+            >
+              <option value="A4">A4</option>
+              <option value="A3">A3</option>
+              <option value="Letter">Letter</option>
+              <option value="Legal">Legal</option>
+            </select>
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Number of Copies</label>
