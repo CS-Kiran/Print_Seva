@@ -50,6 +50,10 @@ To run the project locally, follow these steps:
 
 ## Deployment
 To deploy the application, follow the deployment instructions for React with Vite and Flask as per their respective documentation.
+    - **Note:**
+       - You can refactor back-end code + enhance confidentiality & authentication functionality.
+       - No Payment Gateway added, so you can add on your own cased on your preference.
+
 
 ## Contributing
 Contributions are welcome! Please fork the repository and submit a pull request with your improvements.
